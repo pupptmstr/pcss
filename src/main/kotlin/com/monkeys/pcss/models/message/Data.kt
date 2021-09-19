@@ -1,4 +1,4 @@
-package com.monkeys.pcss.models.data
+package com.monkeys.pcss.models.message
 
 import com.monkeys.pcss.kit
 
@@ -12,7 +12,7 @@ data class Data(
 
 
     constructor(dataMessage: String) : this() {
-        val data = Parser().parseData(dataMessage)
+        val data = parseData(dataMessage)
         messageId = data.messageId
         senderName = data.senderName
         time = data.time
@@ -20,11 +20,11 @@ data class Data(
         fileName = data.fileName
     }
 
-    fun getServerMessage(): String =
+    fun getClientMessage(): String =
         "<$time> [$senderName] :: $messageText :: " +
                 "(${if (fileName.isNullOrEmpty()) "no file" else fileName} attached)\n" +
                 if (!fileName.isNullOrEmpty()) {
-                    //если фото, то
+                    //TODO() если фото, то
                     //берем файл, преобразуем его в аскии и вставляем
                     //иначе пофиг
                     "$fileName\n${kit()}"
@@ -32,6 +32,6 @@ data class Data(
                     kit()
                 }
 
-    fun getClientMessage(): String =
-        "[$messageId],[$senderName],[$time],[$messageText],[$fileName];"
+    fun getServerMessage(): String =
+        "_[$messageId],[$senderName],[$time],[$messageText],[$fileName]_;_"
 }

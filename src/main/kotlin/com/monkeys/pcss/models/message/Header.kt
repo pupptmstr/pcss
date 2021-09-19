@@ -1,6 +1,4 @@
-package com.monkeys.pcss.models.header
-
-import com.monkeys.pcss.models.data.Parser
+package com.monkeys.pcss.models.message
 
 data class Header(
     var type: MessageType = MessageType.LOGIN,
@@ -8,13 +6,13 @@ data class Header(
     var dataSize: Int = 0
 ) {
     constructor(headerMessage: String) : this() {
-        val header = Parser().parseHeader(headerMessage)
+        val header = parseHeader(headerMessage)
         type = header.type
         isFileAttached = header.isFileAttached
         dataSize = header.dataSize
     }
 
-fun getHeader() =
-    "[${type.ordinal}],[$isFileAttached],[$dataSize];"
+    fun getHeader() =
+        "[${type.ordinal}],[${if (isFileAttached) 1 else 0}],[$dataSize]_;"
 
 }

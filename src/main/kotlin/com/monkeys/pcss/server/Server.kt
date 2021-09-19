@@ -1,7 +1,7 @@
 package com.monkeys.pcss.server
 
 import com.monkeys.pcss.models.ClientList
-import com.monkeys.pcss.models.data.Data
+import com.monkeys.pcss.models.message.Data
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -13,13 +13,13 @@ class Server {
     fun start() = runBlocking {
         try {
             val clientList = ClientList()
-            ServerSocket(8081).use {  server ->
+            ServerSocket(8081).use { server ->
                 println("Server is running")
                 while (true) {
                     val client = server.accept()
                     if (client.isConnected) {
                         println("пришел новый клиент")
-                        launch (Dispatchers.Default) {
+                        launch(Dispatchers.Default) {
                             clientCoroutine()
                         }
                         println("я после запуска корутины")
