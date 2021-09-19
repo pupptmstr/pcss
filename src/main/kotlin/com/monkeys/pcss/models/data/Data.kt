@@ -1,6 +1,6 @@
 package com.monkeys.pcss.models.data
 
-import com.monkeys.pcss.models.kit
+import com.monkeys.pcss.kit
 
 data class Data(
     var messageId: String? = null,
@@ -12,7 +12,7 @@ data class Data(
 
 
     constructor(dataMessage: String) : this() {
-        val data = DataParser().parse(dataMessage)
+        val data = Parser().parseData(dataMessage)
         messageId = data.messageId
         senderName = data.senderName
         time = data.time

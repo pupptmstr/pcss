@@ -4,6 +4,7 @@ import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
 
 fun restoreArguments(args: List<String>): WorkType = when {
+    //TODO(обработать флаги для передачи порта с ip")
     args.isEmpty() -> {
         SERVER
     }
@@ -27,3 +28,10 @@ fun printHelp() {
                 "При неверных аргументах тоже выводится хэлп\n"
     )
 }
+
+fun kit(): String =
+    "     (\\.-./) \n" +
+            "   = (^ Y ^) = \n" +
+            "     /`---`\\\n" +
+            "    |U_____U|" +
+            "\n"
