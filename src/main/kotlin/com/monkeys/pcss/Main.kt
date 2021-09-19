@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
         }
 
         CLIENT -> {
-            val client = Client()
+            val client = Client("localhost", 8081)
             client.start()
         }
 
