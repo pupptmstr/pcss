@@ -37,18 +37,20 @@ class Client (host: String, port: Int) {
                     serverMessage = sender.readLine()
                     if (serverMessage == "Name is taken, please try to connect again") {
                         stillWorking = false
-                        nameExist = false
                         break
                     } else {
                         name = userInput
+                        nameExist = false
                         break
                     }
                 }
             }
             println("$serverMessage")
         }
-        if (nameExist)
+        if (nameExist) {
             stopConnection()
+        }
+
         while (stillWorking) {
             print("ok")
         }
