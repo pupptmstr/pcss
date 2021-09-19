@@ -37,6 +37,7 @@ class Client (host: String, port: Int) {
             val message = Message(header, data, ByteArray(0))
 
             receiver.write(message.getMessage())
+            receiver.flush()
 
             val serverMessage : String?
             while (true) {

@@ -20,6 +20,9 @@ class ClientList() {
         } else {
             clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
             socketList[newId] = socket
+            val data = Data(senderName = "server", messageText = "ok")
+            val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
+            socket.getOutputStream().write(Message(header, data).getMessage().toByteArray())
         }
     }
 
@@ -42,5 +45,6 @@ class ClientList() {
     }
 
     fun writeToEveryBody(message: String) {
+        println("text is $message")
     }
 }
