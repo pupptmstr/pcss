@@ -1,6 +1,7 @@
 package com.monkeys.pcss.models.data
 
 import com.monkeys.pcss.models.header.Header
+import com.monkeys.pcss.models.header.MessageType
 
 class Parser {
     
@@ -22,14 +23,14 @@ class Parser {
     }
     
     fun parseHeader(headerMessage: String) : Header {
-        val regex = //TODO("нутить сюда регулярку и номера групп проставить")
-            """""".toRegex()
+        val regex = """\[([0-2])\],\[(true|false)\],\[([0-9]+)\];""".toRegex()
         
         val matchResult = regex.matchEntire(headerMessage)
         return if (matchResult != null) {
-            val type = matchResult.groupValues[]
-            val isFileAttached = matchResult.groupValues[]
-            val dataSize = matchResult.groupValues[]
+            val type = matchResult.groupValues[1]
+            val isFileAttached = matchResult.groupValues[2]
+            val dataSize = matchResult.groupValues[3]
+            Header(MessageType.values()[type.toInt()], isFileAttached.toBoolean(), dataSize.toInt())
         } else {
             Header()
         }
