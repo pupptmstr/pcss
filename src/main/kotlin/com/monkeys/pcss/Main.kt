@@ -19,5 +19,6 @@ fun main(args: Array<String>) {
         HELP -> {
             printHelp()
         }
+
     }
 }

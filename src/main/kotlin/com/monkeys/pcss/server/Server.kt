@@ -17,9 +17,11 @@ class Server {
                 while (true) {
                     val client = server.accept()
                     if (client.isConnected) {
+                        println("пришел новый клиент")
                         launch {
-                            clientCoroutine()
+                            println("я запускаю корутину")
                         }
+                        println("я после запуска корутины")
                     }
                 }
             }

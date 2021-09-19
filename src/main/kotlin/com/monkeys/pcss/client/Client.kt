@@ -23,6 +23,7 @@ class Client (host: String, port: Int) {
 
         println("Enter your nickname or \'q\' to exit.")
         val userInput = readLine()
+        print("userInput")
         if (userInput == null) {
             stillWorking = false
         } else if (userInput == "q") {
