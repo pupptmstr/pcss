@@ -1,5 +1,6 @@
 package com.monkeys.pcss.client
 
+import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.printHelp
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -30,12 +31,22 @@ class Client (host: String, port: Int) {
             receiver.write("EXIT")
             stillWorking = false
         } else {
-            receiver.write(userInput)
+
+            val data = Data(null, userInput, "","", null)
+            val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
+            val message = Message(header, data, ByteArray(0))
+
+            receiver.write(message.getMessage())
+
             val serverMessage : String?
             while (true) {
                 if (socket.isConnected) {
                     serverMessage = sender.readLine()
-                    if (serverMessage == "Name is taken, please try to connect again") {
+                    val parseServerMessage = parseMessage(serverMessage)
+                    val messageInfo = parseServerMessage.data.messageText
+                    val type = parseServerMessage.header.type
+                    if (messageInfo == "Name is taken, please try to connect again"
+                        && type == MessageType.LOGIN) {
                         stillWorking = false
                         break
                     } else {

@@ -8,8 +8,11 @@ fun restoreArguments(args: List<String>): WorkType = when {
     args.isEmpty() -> {
         SERVER
     }
-    args.contains("-c") -> {
+    args.contains("-c") && args.size == 1 -> {
         CLIENT
+    }
+    args.contains("-c") && args.size > 1 -> {
+        CLIENT_WITH_ARGUMENTS
     }
     args.contains("-help") -> {
         HELP

@@ -38,3 +38,6 @@ fun parseMessage(message: String) : Message {
     val file = if (splitMessage.size > 2) splitMessage[2].toByteArray() else ByteArray(0)
     return Message(header, data, file)
 }
+
+fun parseHostAndPort(arg: String) : Pair<String,Int> =
+    Pair(arg.split(":")[0], arg.split(":")[1].toInt())
