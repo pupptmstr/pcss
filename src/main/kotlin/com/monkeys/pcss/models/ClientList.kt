@@ -1,5 +1,9 @@
 package com.monkeys.pcss.models
 
+import com.monkeys.pcss.models.message.Data
+import com.monkeys.pcss.models.message.Header
+import com.monkeys.pcss.models.message.Message
+import com.monkeys.pcss.models.message.MessageType
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
@@ -10,11 +14,12 @@ class ClientList() {
 
     fun addNewClient(socket: Socket, newId: String) {
         if (clients.keys.contains(newId)) {
-            socket.getOutputStream().write("Этот ник уже занят, возьмите другой".toByteArray())
+            val data = Data(senderName = "server", messageText = "Name is taken, please try to connect again")
+            val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
+            socket.getOutputStream().write(Message(header, data).getMessage().toByteArray())
         } else {
             clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
             socketList[newId] = socket
-            //ClientThread(newId, this) - вместо треда запускать новую корутину
         }
     }
 
