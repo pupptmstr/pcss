@@ -13,7 +13,7 @@ data class Message(
     }
 
     fun getMessage() =
-        "${header.getHeader()}${data.getServerMessage()}${file}"
+        "${header.getHeader()}${data.getServerMessage()}[${file}]"
 
 
     override fun equals(other: Any?): Boolean {

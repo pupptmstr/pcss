@@ -3,8 +3,8 @@ package com.monkeys.pcss
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
 
-
-val BYTE_ARRAY_SIZE = 268435456
+const val BYTE_ARRAY_SIZE = 268435456
+val BYTE_ARRAY = ByteArray(BYTE_ARRAY_SIZE)
 
 fun restoreArguments(args: List<String>): WorkType = when {
     //TODO(обработать флаги для передачи порта с ip")

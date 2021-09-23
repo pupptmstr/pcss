@@ -1,5 +1,7 @@
 package com.monkeys.pcss.models.message
 
+import java.io.File
+
 fun parseData(dataMessage: String): Data {
     val regex =
         """\[([A-Za-z]+)?\],\[([A-Za-z0-9]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])?\],\[([^\[\]]+)\],\[(([^(\[\])]+)\.([a-z]+))?\]""".toRegex()
@@ -39,5 +41,31 @@ fun parseMessage(message: String) : Message {
     return Message(header, data, file)
 }
 
-fun parseHostAndPort(arg: String) : Pair<String,Int> =
+fun parseHostAndPort(arg: String) : Pair<String, Int> =
     Pair(arg.split(":")[0], arg.split(":")[1].toInt())
+
+fun parseUserMessage(msg: String) : Pair<String,File?> {
+    val splitMsg = msg.split("[[")
+    var filePath = splitMsg[splitMsg.size - 1]
+    filePath = filePath.filterNot { str -> "]]".contains(str) }
+    val file = File(filePath)
+    if (file.isFile) {
+        return when (splitMsg.size) {
+            1 -> Pair(msg, null)
+            2 -> Pair(splitMsg[0], file)
+            else -> Pair(collectMessage(splitMsg), file)
+        }
+    } else {
+        return Pair(msg, null)
+    }
+
+}
+
+fun collectMessage(splitMsg: List<String>): String {
+    val builder = StringBuilder()
+    for (i in 0..splitMsg.size-2) {
+        builder.append(splitMsg[i])
+        builder.append("[[")
+    }
+    return builder.toString().substring(0, builder.length-2)
+}

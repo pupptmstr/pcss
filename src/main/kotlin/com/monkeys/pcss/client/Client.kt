@@ -1,11 +1,12 @@
 package com.monkeys.pcss.client
 
+import com.monkeys.pcss.BYTE_ARRAY
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.printHelp
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import java.io.*
 import java.net.Socket
 import java.net.SocketException
 
@@ -15,59 +16,59 @@ class Client (host: String, port: Int) {
     private val receiver = socket.getInputStream()
     private val sender = socket.getOutputStream()
     private lateinit var name: String
+    private var stillWorking = true
 
-    fun start() {
+    suspend fun start() = coroutineScope {
         println("Был запущен клиент")
         printHelp()
         var nameExist = true
-        var stillWorking = true
 
         println("Enter your nickname or \'q\' to exit.")
-        val userInput = readLine()
-        if (userInput == null) {
-            stillWorking = false
-        } else if (userInput == "q") {
-            sender.write("EXIT".toByteArray())
-            stillWorking = false
-        } else {
-
-            val data = Data(null, userInput, "","", null)
-            val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
-            val message = Message(header, data, ByteArray(0))
-
-            sender.write(message.getMessage().toByteArray())
-            var serverMessage : String?
-            val byteArray = ByteArray(100000)
-            while (nameExist) {
-                if (receiver.available() > 0) {
-                    receiver.read(byteArray, 0, receiver.available()).toString()
-                    serverMessage = String(byteArray).replace("\u0000", "")
-                    println(serverMessage)
-                    val parseServerMessage = parseMessage(serverMessage)
-                    println(parseServerMessage)
-                    val messageInfo = parseServerMessage.data.messageText
-                    println(messageInfo)
-                    val type = parseServerMessage.header.type
-                    val senderName = parseServerMessage.data.senderName
-                    if (messageInfo == "Name is taken, please try to connect again"
-                        && type == MessageType.LOGIN && senderName == "server") {
-                        stillWorking = false
-                        nameExist = false
-                    } else  if (messageInfo == "ok" && type == MessageType.LOGIN
-                        && senderName == "server") {
-                        name = userInput
-                        nameExist = false
-                    }
+        when (val userInput = readLine()) {
+            null -> {
+                stillWorking = false
             }
-        }
+            "q" -> {
+                sender.write("EXIT".toByteArray())
+                stillWorking = false
+            }
+            else -> {
+
+                val data = Data(null, userInput, "","", null)
+                val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
+                val message = Message(header, data, ByteArray(0))
+
+                sender.write(message.getMessage().toByteArray())
+                var messageInfo = ""
+                while (nameExist) {
+                    if (receiver.available() > 0) {
+                        receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
+                        val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
+                        println(serverMessage)
+                        val parseServerMessage = parseMessage(serverMessage)
+                        messageInfo = parseServerMessage.data.messageText
+                        val type = parseServerMessage.header.type
+                        val senderName = parseServerMessage.data.senderName
+                        if (messageInfo == "Name is taken, please try to connect again"
+                            && type == MessageType.LOGIN && senderName == "server") {
+                            stillWorking = false
+                            nameExist = false
+                        } else {
+                            name = userInput
+                            nameExist = false
+                        }
+                    }
+                }
+                println(messageInfo)
+                println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
+            }
         }
         if (nameExist) {
             stopConnection()
         }
 
-//        while (stillWorking) {
-//
-//        }
+        launch(Dispatchers.Default) { sendingMessages() }
+        launch(Dispatchers.Default) { receivingMessages() }
     }
 
     private fun stopConnection() {
@@ -82,4 +83,69 @@ class Client (host: String, port: Int) {
         }
     }
 
+    private fun sendingMessages() {
+        while (stillWorking) {
+            val userMessage = readLine()
+            if (userMessage == "q") {
+                sender.write("EXIT".toByteArray())
+               stillWorking = false
+            } else {
+                val parsedMsg = parseUserMessage(userMessage.toString())
+                val msg = parsedMsg.first
+                val file = parsedMsg.second
+                val fileName = file?.name
+                val fileByteArray = file?.readBytes()
+                val byteArraySize = fileByteArray?.size ?: 0
+                val data = Data(null, name, "", msg, fileName)
+                val header = Header(MessageType.MESSAGE, file != null,
+                    data.getServerMessage().length + byteArraySize)
+                val message = Message(header, data, fileByteArray ?: ByteArray(0))
+
+                sender.write(message.getMessage().toByteArray())
+
+                var messageDelivered = false
+
+                while (!messageDelivered) {
+                    if (receiver.available() > 0) {
+                        receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
+                        val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
+                        println(serverMessage)
+                       val parseServerMessage = parseMessage(serverMessage)
+                       val messageInfo = parseServerMessage.data.messageText
+                       val type = parseServerMessage.header.type
+                       val senderName = parseServerMessage.data.senderName
+                       messageDelivered = if (messageInfo == "1" && type == MessageType.SPECIAL
+                           && senderName == "server") {
+                           true
+                       } else {
+                           println("not del")
+                           true
+                       }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun receivingMessages() {
+        while (stillWorking) {
+            if (receiver.available() > 0) {
+                receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
+                val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
+                println(serverMessage)
+                val parseServerMessage = parseMessage(serverMessage)
+                val messageInfo = parseServerMessage.data.messageText
+                val type = parseServerMessage.header.type
+                val senderName = parseServerMessage.data.senderName
+
+//                if (file != null) {
+//                    val byteArray = file.readBytes()
+//                    val file1 = File("src/pictures/" + "hjf.jpg")
+//                    file1.createNewFile()
+//                    file1.writeBytes(byteArray)
+//                }
+
+            }
+        }
+    }
 }
