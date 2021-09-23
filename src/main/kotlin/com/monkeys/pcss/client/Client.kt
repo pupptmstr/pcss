@@ -12,8 +12,8 @@ import java.net.SocketException
 class Client (host: String, port: Int) {
 
     private var socket: Socket = Socket(host, port)
-    private var sender: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
-    private var receiver: BufferedWriter = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
+    private val receiver = socket.getInputStream()
+    private val sender = socket.getOutputStream()
     private lateinit var name: String
 
     fun start() {
@@ -24,11 +24,10 @@ class Client (host: String, port: Int) {
 
         println("Enter your nickname or \'q\' to exit.")
         val userInput = readLine()
-        print("userInput")
         if (userInput == null) {
             stillWorking = false
         } else if (userInput == "q") {
-            receiver.write("EXIT")
+            sender.write("EXIT".toByteArray())
             stillWorking = false
         } else {
 
@@ -36,28 +35,31 @@ class Client (host: String, port: Int) {
             val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
             val message = Message(header, data, ByteArray(0))
 
-            receiver.write(message.getMessage())
-            receiver.flush()
-
-            val serverMessage : String?
+            sender.write(message.getMessage().toByteArray())
+            var serverMessage : String?
+            val byteArray = ByteArray(100000)
             while (true) {
-                if (socket.isConnected) {
-                    serverMessage = sender.readLine()
+                if (receiver.available() > 0) {
+                    receiver.read(byteArray, 0, receiver.available()).toString()
+                    serverMessage = String(byteArray).replace("\u0000", "")
+                    println(serverMessage)
                     val parseServerMessage = parseMessage(serverMessage)
+                    println(parseServerMessage)
                     val messageInfo = parseServerMessage.data.messageText
+                    println(messageInfo)
                     val type = parseServerMessage.header.type
                     if (messageInfo == "Name is taken, please try to connect again"
                         && type == MessageType.LOGIN) {
                         stillWorking = false
                         break
-                    } else {
+                    } else  if (messageInfo == "ok" && type == MessageType.LOGIN) {
                         name = userInput
                         nameExist = false
                         break
                     }
-                }
             }
-            println("$serverMessage")
+
+        }
         }
         if (nameExist) {
             stopConnection()
