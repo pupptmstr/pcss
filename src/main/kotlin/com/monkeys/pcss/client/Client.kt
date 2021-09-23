@@ -38,7 +38,7 @@ class Client (host: String, port: Int) {
             sender.write(message.getMessage().toByteArray())
             var serverMessage : String?
             val byteArray = ByteArray(100000)
-            while (true) {
+            while (nameExist) {
                 if (receiver.available() > 0) {
                     receiver.read(byteArray, 0, receiver.available()).toString()
                     serverMessage = String(byteArray).replace("\u0000", "")
@@ -48,26 +48,26 @@ class Client (host: String, port: Int) {
                     val messageInfo = parseServerMessage.data.messageText
                     println(messageInfo)
                     val type = parseServerMessage.header.type
+                    val senderName = parseServerMessage.data.senderName
                     if (messageInfo == "Name is taken, please try to connect again"
-                        && type == MessageType.LOGIN) {
+                        && type == MessageType.LOGIN && senderName == "server") {
                         stillWorking = false
-                        break
-                    } else  if (messageInfo == "ok" && type == MessageType.LOGIN) {
+                        nameExist = false
+                    } else  if (messageInfo == "ok" && type == MessageType.LOGIN
+                        && senderName == "server") {
                         name = userInput
                         nameExist = false
-                        break
                     }
             }
-
         }
         }
         if (nameExist) {
             stopConnection()
         }
 
-        while (stillWorking) {
-            print("ok")
-        }
+//        while (stillWorking) {
+//
+//        }
     }
 
     private fun stopConnection() {
