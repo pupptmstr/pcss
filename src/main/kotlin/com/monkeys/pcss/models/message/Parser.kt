@@ -2,7 +2,7 @@ package com.monkeys.pcss.models.message
 
 fun parseData(dataMessage: String): Data {
     val regex =
-        """\[([A-Za-z]+)?\],\[([A-Za-z0-9]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])\],\[([^\[\]]+)\],\[(([^(\[\])]+)\.([a-z]+))?\];""".toRegex()
+        """\[([A-Za-z]+)?\],\[([A-Za-z0-9]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])?\],\[([^\[\]]+)\],\[(([^(\[\])]+)\.([a-z]+))?\]""".toRegex()
     val matchResult = regex.matchEntire(dataMessage)
     return if (matchResult != null) {
         val messageId = matchResult.groupValues[1]
@@ -18,7 +18,7 @@ fun parseData(dataMessage: String): Data {
 
 fun parseHeader(headerMessage: String): Header {
     val regex =
-        """\[([0-2])\],\[([01])\],\[([0-9]+)\];""".toRegex()
+        """\[([0-2])\],\[([01])\],\[([0-9]+)\]""".toRegex()
 
     val matchResult = regex.matchEntire(headerMessage)
     return if (matchResult != null) {
@@ -32,7 +32,7 @@ fun parseHeader(headerMessage: String): Header {
 }
 
 fun parseMessage(message: String) : Message {
-    val splitMessage = message.split("]_;_[")
+    val splitMessage = message.split("_;_")
     val header = parseHeader(splitMessage[0])
     val data = parseData(splitMessage[1])
     val file = if (splitMessage.size > 2) splitMessage[2].toByteArray() else ByteArray(0)

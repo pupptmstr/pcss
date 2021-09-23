@@ -33,5 +33,5 @@ data class Data(
                 }
 
     fun getServerMessage(): String =
-        "_[$messageId],[$senderName],[$time],[$messageText],[$fileName]_;_"
+        "_[${messageId ?: ""}],[$senderName],[$time],[$messageText],[${fileName?: ""}]_;_"
 }
