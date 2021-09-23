@@ -134,16 +134,25 @@ class Client (host: String, port: Int) {
                 val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
                 println(serverMessage)
                 val parseServerMessage = parseMessage(serverMessage)
-                val messageInfo = parseServerMessage.data.messageText
-                val type = parseServerMessage.header.type
                 val senderName = parseServerMessage.data.senderName
+                val time = parseServerMessage.data.time
+                val message = parseServerMessage.data.messageText
+                val fileName = parseServerMessage.data.fileName
 
-//                if (file != null) {
-//                    val byteArray = file.readBytes()
-//                    val file1 = File("src/pictures/" + "hjf.jpg")
-//                    file1.createNewFile()
-//                    file1.writeBytes(byteArray)
-//                }
+                if (fileName != null) {
+                    val fileByteArray = parseServerMessage.file
+                    val file1 = File(fileName)
+                    file1.createNewFile()
+                    file1.writeBytes(fileByteArray)
+                }
+
+                //TODO отображение сообщения в консоли
+
+                val id = parseServerMessage.data.messageId
+                val dataSpec = Data(id, name, "","1", null)
+                val headerSpec = Header(MessageType.SPECIAL, false, dataSpec.getServerMessage().length)
+                val messageSpec = Message(headerSpec, dataSpec, ByteArray(0))
+                sender.write(messageSpec.getMessage().toByteArray())
 
             }
         }
