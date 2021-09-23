@@ -3,6 +3,9 @@ package com.monkeys.pcss
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
 
+
+val BYTE_ARRAY_SIZE = 268435456
+
 fun restoreArguments(args: List<String>): WorkType = when {
     //TODO(обработать флаги для передачи порта с ip")
     args.isEmpty() -> {
@@ -38,3 +41,8 @@ fun kit(): String =
             "     /`---`\\\n" +
             "    |U_____U|" +
             "\n"
+
+fun generateMessageId(): String {
+ //TODO()
+    return "test6556"
+}
