@@ -84,22 +84,25 @@ class Client (host: String, port: Int) {
 
     private fun sendingMessages() {
         while (stillWorking) {
-            val userMessage = readLine()
-            if (userMessage == "q") {
-                sender.write("EXIT".toByteArray())
-               stillWorking = false
-            } else {
-                val parsedMsg = parseUserMessage(userMessage.toString())
-                val msg = parsedMsg.first
-                val file = parsedMsg.second
-                val fileName = file?.name
-                val fileByteArray = file?.readBytes()
-                val data = Data(null, name, "", msg, fileName)
-                val header = Header(MessageType.MESSAGE, file != null,
-                    data.getServerMessage().toByteArray().size)
-                val message = Message(header, data, fileByteArray ?: ByteArray(0))
-                val messageRes = message.getMessage()
-                sender.write(messageRes)
+            when (val userMessage = readLine()) {
+                "" -> continue
+                "q" -> {
+                    sender.write("EXIT".toByteArray())
+                    stillWorking = false
+                }
+                else -> {
+                    val parsedMsg = parseUserMessage(userMessage.toString())
+                    val msg = parsedMsg.first
+                    val file = parsedMsg.second
+                    val fileName = file?.name
+                    val fileByteArray = file?.readBytes()
+                    val data = Data(null, name, "", msg, fileName)
+                    val header = Header(MessageType.MESSAGE, file != null,
+                        data.getServerMessage().toByteArray().size)
+                    val message = Message(header, data, fileByteArray ?: ByteArray(0))
+                    val messageRes = message.getMessage()
+                    sender.write(messageRes)
+                }
             }
         }
     }
