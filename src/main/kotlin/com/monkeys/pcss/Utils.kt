@@ -2,6 +2,7 @@ package com.monkeys.pcss
 
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
+import java.io.InputStream
 
 const val BYTE_ARRAY_SIZE = 268435456/4
 val BYTE_ARRAY = ByteArray(BYTE_ARRAY_SIZE)
@@ -45,4 +46,10 @@ fun kit(): String =
 fun generateMessageId(): String {
  //TODO()
     return "test6556"
+}
+
+fun readFromInputSteam(inputStream: InputStream): String {
+    val byteArray = ByteArray(inputStream.available())
+    inputStream.read(byteArray, 0, inputStream.available())
+    return String(byteArray).replace("\u0000", "")
 }
