@@ -94,34 +94,12 @@ class Client (host: String, port: Int) {
                 val file = parsedMsg.second
                 val fileName = file?.name
                 val fileByteArray = file?.readBytes()
-                println(fileByteArray)
                 val data = Data(null, name, "", msg, fileName)
                 val header = Header(MessageType.MESSAGE, file != null,
                     data.getServerMessage().toByteArray().size)
                 val message = Message(header, data, fileByteArray ?: ByteArray(0))
                 val messageRes = message.getMessage()
                 sender.write(messageRes)
-
-//                var messageDelivered = false
-//
-//                while (!messageDelivered) {
-//                    if (receiver.available() > 0) {
-//                        receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
-//                        val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
-//                        println(serverMessage)
-//                       val parseServerMessage = parseMessage(serverMessage)
-//                       val messageInfo = parseServerMessage.data.messageText
-//                       val type = parseServerMessage.header.type
-//                       val senderName = parseServerMessage.data.senderName
-//                       messageDelivered = if (messageInfo == "1" && type == MessageType.SPECIAL
-//                           && senderName == "server") {
-//                           true
-//                       } else {
-//                           println("not del")
-//                           true
-//                       }
-//                    }
-//                }
             }
         }
     }
@@ -140,7 +118,6 @@ class Client (host: String, port: Int) {
 
                 val fileByteArray = substring(inputStreamStr.second,
                     parsedServerMessage.header.getHeader().toByteArray().size + parsedServerMessage.header.dataSize)
-                println(fileByteArray)
 
                 if (fileName != null && fileByteArray != null) {
                     val file1 = File(fileName)
