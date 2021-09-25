@@ -45,7 +45,7 @@ fun kit(): String =
 
 fun generateMessageId(): String {
  //TODO()
-    return "test6556"
+    return "testNew"
 }
 
 fun readFromInputSteam(inputStream: InputStream): Pair<String, ByteArray> {
