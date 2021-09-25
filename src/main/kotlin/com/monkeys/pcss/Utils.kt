@@ -3,7 +3,7 @@ package com.monkeys.pcss
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
 
-const val BYTE_ARRAY_SIZE = 268435456
+const val BYTE_ARRAY_SIZE = 268435456/4
 val BYTE_ARRAY = ByteArray(BYTE_ARRAY_SIZE)
 
 fun restoreArguments(args: List<String>): WorkType = when {

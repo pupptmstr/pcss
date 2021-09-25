@@ -31,7 +31,8 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
         if (receiver.available() > 0) {
             receiver.read(byteArray, 0, receiver.available()).toString()
             val message = String(byteArray).replace("\u0000", "")
-            name = parseMessage(message).data.senderName
+            val parsedMessage = parseMessage(message)
+            name = parsedMessage.data.senderName
             println("Client name is $name")
             isSuccessfullyLogin = clientList.addNewClient(client, name)
             break
@@ -44,7 +45,7 @@ fun startCommunication(clientId: String, clientList: ClientList) {
     println("Client $clientId connected to chat")
     var isWorking = true
     val receiver = clientList.getInputStream(clientId)
-    val byteArray = ByteArray(BYTE_ARRAY_SIZE)
+    var byteArray = ByteArray(BYTE_ARRAY_SIZE)
     while (isWorking) {
         if (receiver.available() > 0) {
             receiver.read(byteArray, 0, receiver.available()).toString()
@@ -77,5 +78,6 @@ fun startCommunication(clientId: String, clientList: ClientList) {
                 println("Got message with type '${parsedMessage.header.type}' and text '${parsedMessage.data.messageText}' from '${parsedMessage.data.senderName}'")
             }
         }
+        byteArray = ByteArray(BYTE_ARRAY_SIZE)
     }
 }
