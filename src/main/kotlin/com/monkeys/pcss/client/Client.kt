@@ -3,6 +3,7 @@ package com.monkeys.pcss.client
 import com.monkeys.pcss.BYTE_ARRAY
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.printHelp
+import com.monkeys.pcss.readFromInputSteam
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -42,9 +43,7 @@ class Client (host: String, port: Int) {
                 var messageInfo = ""
                 while (nameExist) {
                     if (receiver.available() > 0) {
-                        receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
-                        val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
-                        println(serverMessage)
+                        val serverMessage = readFromInputSteam(receiver)
                         val parseServerMessage = parseMessage(serverMessage)
                         messageInfo = parseServerMessage.data.messageText
                         val type = parseServerMessage.header.type
@@ -130,8 +129,7 @@ class Client (host: String, port: Int) {
     private fun receivingMessages() {
         while (stillWorking) {
             if (receiver.available() > 0) {
-                receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
-                val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
+                val serverMessage = readFromInputSteam(receiver)
                 println(serverMessage)
                 val parseServerMessage = parseMessage(serverMessage)
                 val senderName = parseServerMessage.data.senderName
