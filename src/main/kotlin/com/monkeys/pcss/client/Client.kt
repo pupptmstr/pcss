@@ -6,7 +6,7 @@ import com.monkeys.pcss.printHelp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import java.io.*
+import java.io.File
 import java.net.Socket
 import java.net.SocketException
 
@@ -103,26 +103,26 @@ class Client (host: String, port: Int) {
 
                 sender.write(message.getMessage().toByteArray())
 
-                var messageDelivered = false
-
-                while (!messageDelivered) {
-                    if (receiver.available() > 0) {
-                        receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
-                        val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
-                        println(serverMessage)
-                       val parseServerMessage = parseMessage(serverMessage)
-                       val messageInfo = parseServerMessage.data.messageText
-                       val type = parseServerMessage.header.type
-                       val senderName = parseServerMessage.data.senderName
-                       messageDelivered = if (messageInfo == "1" && type == MessageType.SPECIAL
-                           && senderName == "server") {
-                           true
-                       } else {
-                           println("not del")
-                           true
-                       }
-                    }
-                }
+//                var messageDelivered = false
+//
+//                while (!messageDelivered) {
+//                    if (receiver.available() > 0) {
+//                        receiver.read(BYTE_ARRAY, 0, receiver.available()).toString()
+//                        val serverMessage = String(BYTE_ARRAY).replace("\u0000", "")
+//                        println(serverMessage)
+//                       val parseServerMessage = parseMessage(serverMessage)
+//                       val messageInfo = parseServerMessage.data.messageText
+//                       val type = parseServerMessage.header.type
+//                       val senderName = parseServerMessage.data.senderName
+//                       messageDelivered = if (messageInfo == "1" && type == MessageType.SPECIAL
+//                           && senderName == "server") {
+//                           true
+//                       } else {
+//                           println("not del")
+//                           true
+//                       }
+//                    }
+//                }
             }
         }
     }
@@ -146,7 +146,7 @@ class Client (host: String, port: Int) {
                     file1.writeBytes(fileByteArray)
                 }
 
-                //TODO отображение сообщения в консоли
+                println(parseServerMessage.data.getClientMessage())
 
                 val id = parseServerMessage.data.messageId
                 val dataSpec = Data(id, name, "","1", null)

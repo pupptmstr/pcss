@@ -7,10 +7,11 @@ import com.monkeys.pcss.models.message.MessageType
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
+import java.util.*
 
-class ClientList() {//TODO("сделать коллекции синхронайзабл")
-    private val clients = mutableMapOf<String, Pair<InputStream, OutputStream>>()
-    private val socketList = mutableMapOf<String, Socket>()
+class ClientList() {
+    private val clients = Collections.synchronizedMap(mutableMapOf<String, Pair<InputStream, OutputStream>>())
+    private val socketList = Collections.synchronizedMap(mutableMapOf<String, Socket>())
 
     fun addNewClient(socket: Socket, newId: String): Boolean {
         return if (clients.keys.contains(newId)) {
@@ -47,6 +48,12 @@ class ClientList() {//TODO("сделать коллекции синхронай
     }
 
     fun writeToEveryBody(message: Message) {
+        val name = message.data.senderName
+        clients.forEach { client ->
+            if (client.key != name) {
+                client.value.second.write(message.getMessage().toByteArray())
+            }
+        }
         println("text is $message")
     }
 }
