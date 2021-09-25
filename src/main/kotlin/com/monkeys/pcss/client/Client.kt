@@ -3,6 +3,7 @@ package com.monkeys.pcss.client
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.printHelp
 import com.monkeys.pcss.readFromInputSteam
+import com.monkeys.pcss.substring
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -93,6 +94,7 @@ class Client (host: String, port: Int) {
                 val file = parsedMsg.second
                 val fileName = file?.name
                 val fileByteArray = file?.readBytes()
+                println(fileByteArray)
                 val data = Data(null, name, "", msg, fileName)
                 val header = Header(MessageType.MESSAGE, file != null,
                     data.getServerMessage().toByteArray().size)
@@ -127,24 +129,28 @@ class Client (host: String, port: Int) {
     private fun receivingMessages() {
         while (stillWorking) {
             if (receiver.available() > 0) {
-                val serverMessage = readFromInputSteam(receiver).first
+                val inputStreamStr = readFromInputSteam(receiver)
+                val serverMessage = inputStreamStr.first
                 println(serverMessage)
-                val parseServerMessage = parseMessage(serverMessage)
-                val senderName = parseServerMessage.data.senderName
-                val time = parseServerMessage.data.time
-                val message = parseServerMessage.data.messageText
-                val fileName = parseServerMessage.data.fileName
+                val parsedServerMessage = parseMessage(serverMessage)
+                val senderName = parsedServerMessage.data.senderName
+                val time = parsedServerMessage.data.time
+                val message = parsedServerMessage.data.messageText
+                val fileName = parsedServerMessage.data.fileName
 
-                if (fileName != null) {
-                    val fileByteArray = parseServerMessage.file
+                val fileByteArray = substring(inputStreamStr.second,
+                    parsedServerMessage.header.getHeader().toByteArray().size + parsedServerMessage.header.dataSize)
+                println(fileByteArray)
+
+                if (fileName != null && fileByteArray != null) {
                     val file1 = File(fileName)
                     file1.createNewFile()
                     file1.writeBytes(fileByteArray)
                 }
 
-                println(parseServerMessage.data.getClientMessage())
+                println(parsedServerMessage.data.getClientMessage())
 
-                val id = parseServerMessage.data.messageId
+                val id = parsedServerMessage.data.messageId
                 val dataSpec = Data(id, name, "","1", null)
                 val headerSpec = Header(MessageType.SPECIAL, false, dataSpec.getServerMessage().length)
                 val messageSpec = Message(headerSpec, dataSpec, ByteArray(0))
