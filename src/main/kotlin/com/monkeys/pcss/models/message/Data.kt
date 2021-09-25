@@ -16,12 +16,14 @@ data class Data(
         messageId = data.messageId
         senderName = data.senderName
         time = data.time
-        messageText = data.messageText
+        messageText = data.messageText.replace("[", "_%+<+$")
+            .replace("]", "_%+>+\$")
         fileName = data.fileName
     }
 
     fun getClientMessage(): String =
-        "<$time> [$senderName] :: $messageText :: " +
+        "<$time> [$senderName] :: ${messageText.replace( "_%+<+$","[")
+            .replace("_%+>+\$", "]")} :: " +
                 "(${if (fileName.isNullOrEmpty()) "no file" else fileName} attached)\n" +
                 if (!fileName.isNullOrEmpty()) {
                     //TODO() если фото, то
