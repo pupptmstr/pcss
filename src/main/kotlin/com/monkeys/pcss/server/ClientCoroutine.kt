@@ -4,6 +4,7 @@ import com.monkeys.pcss.generateMessageId
 import com.monkeys.pcss.models.ClientList
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readFromInputSteam
+import com.monkeys.pcss.substring
 import kotlinx.coroutines.delay
 import java.net.Socket
 import java.time.LocalTime
@@ -28,7 +29,7 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
     while (true) {
         if (receiver.available() > 0) {
             val message = readFromInputSteam(receiver)
-            val parsedMessage = parseMessage(message)
+            val parsedMessage = parseMessage(message.first)
             name = parsedMessage.data.senderName
             println("Client name is $name")
             isSuccessfullyLogin = clientList.addNewClient(client, name)
@@ -45,25 +46,27 @@ fun startCommunication(clientId: String, clientList: ClientList) {
     while (isWorking) {
         if (receiver.available() > 0) {
             val message = readFromInputSteam(receiver)
-            val parsedMessage = parseMessage(message)
+            val parsedMessage = parseMessage(message.first)
             if (parsedMessage.header.type == MessageType.MESSAGE) {
                 val messageId = generateMessageId()
                 val now = LocalTime.now()
                 val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
+                val file = substring(message.second, parsedMessage.header.getHeader().toByteArray().size + parsedMessage.header.dataSize)
+                val data = Data(
+                    messageId,
+                    parsedMessage.data.senderName,
+                    time,
+                    parsedMessage.data.messageText,
+                    parsedMessage.data.fileName
+                )
                 val resMessage = Message(
                     Header(
                         MessageType.MESSAGE,
                         parsedMessage.header.isFileAttached,
-                        message.length
+                        data.getServerMessage().toByteArray().size
                         ),
-                    Data(
-                        messageId,
-                        parsedMessage.data.senderName,
-                        time,
-                        parsedMessage.data.messageText,
-                        parsedMessage.data.fileName
-                    ),
-                    parsedMessage.file
+                    data,
+                    file ?: ByteArray(0)
                 )
                 clientList.writeToEveryBody(resMessage)
             } else if (parsedMessage.data.messageText == "EXIT") {

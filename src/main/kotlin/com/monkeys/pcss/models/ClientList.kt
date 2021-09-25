@@ -17,14 +17,14 @@ class ClientList() {
         return if (clients.keys.contains(newId)) {
             val data = Data(senderName = "server", messageText = "Name is taken, please try to connect again")
             val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
-            socket.getOutputStream().write(Message(header, data).getMessage().toByteArray())
+            socket.getOutputStream().write(Message(header, data).getMessage())
             false
         } else {
             clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
             socketList[newId] = socket
             val data = Data(senderName = "server", messageText = "Great, your name now is $newId, you can communicate")
             val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
-            socket.getOutputStream().write(Message(header, data).getMessage().toByteArray())
+            socket.getOutputStream().write(Message(header, data).getMessage())
             true
         }
     }
@@ -51,7 +51,7 @@ class ClientList() {
         val name = message.data.senderName
         clients.forEach { client ->
             if (client.key != name) {
-                client.value.second.write(message.getMessage().toByteArray())
+                client.value.second.write(message.getMessage())
             }
         }
         println("text is $message")

@@ -1,6 +1,5 @@
 package com.monkeys.pcss.client
 
-import com.monkeys.pcss.BYTE_ARRAY
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.printHelp
 import com.monkeys.pcss.readFromInputSteam
@@ -39,11 +38,11 @@ class Client (host: String, port: Int) {
                 val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
                 val message = Message(header, data, ByteArray(0))
 
-                sender.write(message.getMessage().toByteArray())
+                sender.write(message.getMessage())
                 var messageInfo = ""
                 while (nameExist) {
                     if (receiver.available() > 0) {
-                        val serverMessage = readFromInputSteam(receiver)
+                        val serverMessage = readFromInputSteam(receiver).first
                         val parseServerMessage = parseMessage(serverMessage)
                         messageInfo = parseServerMessage.data.messageText
                         val type = parseServerMessage.header.type
@@ -94,13 +93,12 @@ class Client (host: String, port: Int) {
                 val file = parsedMsg.second
                 val fileName = file?.name
                 val fileByteArray = file?.readBytes()
-                val byteArraySize = fileByteArray?.size ?: 0
                 val data = Data(null, name, "", msg, fileName)
                 val header = Header(MessageType.MESSAGE, file != null,
-                    data.getServerMessage().length + byteArraySize)
+                    data.getServerMessage().toByteArray().size)
                 val message = Message(header, data, fileByteArray ?: ByteArray(0))
-
-                sender.write(message.getMessage().toByteArray())
+                val messageRes = message.getMessage()
+                sender.write(messageRes)
 
 //                var messageDelivered = false
 //
@@ -129,7 +127,7 @@ class Client (host: String, port: Int) {
     private fun receivingMessages() {
         while (stillWorking) {
             if (receiver.available() > 0) {
-                val serverMessage = readFromInputSteam(receiver)
+                val serverMessage = readFromInputSteam(receiver).first
                 println(serverMessage)
                 val parseServerMessage = parseMessage(serverMessage)
                 val senderName = parseServerMessage.data.senderName
@@ -150,7 +148,7 @@ class Client (host: String, port: Int) {
                 val dataSpec = Data(id, name, "","1", null)
                 val headerSpec = Header(MessageType.SPECIAL, false, dataSpec.getServerMessage().length)
                 val messageSpec = Message(headerSpec, dataSpec, ByteArray(0))
-                sender.write(messageSpec.getMessage().toByteArray())
+                sender.write(messageSpec.getMessage())
 
             }
         }

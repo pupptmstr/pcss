@@ -48,8 +48,20 @@ fun generateMessageId(): String {
     return "test6556"
 }
 
-fun readFromInputSteam(inputStream: InputStream): String {
+fun readFromInputSteam(inputStream: InputStream): Pair<String, ByteArray> {
     val byteArray = ByteArray(inputStream.available())
     inputStream.read(byteArray, 0, inputStream.available())
-    return String(byteArray).replace("\u0000", "")
+    return Pair(String(byteArray).replace("\u0000", ""), byteArray)
+}
+
+fun substring(array: ByteArray, start: Int): ByteArray? {
+    return substring(array, start, array.size)
+}
+
+fun substring(array: ByteArray?, start: Int, end: Int): ByteArray? {
+    if (end <= start) return null
+    val length = end - start
+    val newArray = ByteArray(length)
+    System.arraycopy(array, start, newArray, 0, length)
+    return newArray
 }
