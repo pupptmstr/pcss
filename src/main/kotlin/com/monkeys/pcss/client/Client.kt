@@ -116,14 +116,14 @@ class Client(host: String, port: Int) {
     }
 
     private fun receivingMessages() {
+        println("receivingMessages()")
         while (stillWorking) {
-
             val serverMessage = receiver.readLine()
             val message = parseMessage(serverMessage)
             val fileName = message.data.fileName
             val fileByteArray = message.file
 
-            if (fileName != null && fileByteArray.isEmpty()) {
+            if (!fileName.isNullOrEmpty() && fileByteArray.isNotEmpty()) {
                 val file1 = File(fileName)
                 file1.createNewFile()
                 file1.writeBytes(fileByteArray)
