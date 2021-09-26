@@ -5,7 +5,7 @@ import java.util.*
 
 fun parseData(dataMessage: String): Data {
     val regex =
-        """\[([A-Za-z]+)?\],\[([A-Za-z0-9]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z]+))?\]""".toRegex()
+        """\[([A-Za-z0-9]+)?\],\[([A-Za-z0-9А-Яа-я]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z]+))?\]""".toRegex()
     val matchResult = regex.matchEntire(dataMessage)
     return if (matchResult != null) {
         val messageId = matchResult.groupValues[1]

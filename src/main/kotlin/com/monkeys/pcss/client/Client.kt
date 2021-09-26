@@ -30,8 +30,8 @@ class Client(host: String, port: Int) {
                 stillWorking = false
             }
             else -> {
-
-                val data = Data(null, userInput, "", "", null)
+                val decodedUserInput = String(userInput.toByteArray(Charsets.UTF_8), Charsets.UTF_8)
+                val data = Data(null, decodedUserInput, "", "", null)
                 val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
                 val message = Message(header, data, ByteArray(0))
 
@@ -50,7 +50,7 @@ class Client(host: String, port: Int) {
                         stillWorking = false
                         nameExist = false
                     } else {
-                        name = userInput
+                        name = decodedUserInput
                         nameExist = false
                     }
                 }
@@ -81,14 +81,15 @@ class Client(host: String, port: Int) {
     private fun sendingMessages() {
         while (stillWorking) {
             print("Message: ")
-            when (val userMessage = readLine()) {
-                "" -> continue
+            when (val userInput = readLine()) {
+                "", null -> continue
                 "q" -> {
                     sender.write("EXIT")
                     stillWorking = false
                 }
                 else -> {
-                    val parsedMsg = parseUserMessage(userMessage.toString())
+                    val userMessage = String(userInput.toByteArray(Charsets.UTF_8), Charsets.UTF_8)
+                    val parsedMsg = parseUserMessage(userMessage)
                     val msg = parsedMsg.first
                     val file = parsedMsg.second
                     val fileName = file?.name
