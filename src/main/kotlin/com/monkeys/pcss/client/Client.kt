@@ -2,6 +2,7 @@ package com.monkeys.pcss.client
 
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.printHelp
+import com.monkeys.pcss.shapingFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -121,10 +122,12 @@ class Client(host: String, port: Int) {
             val serverMessage = receiver.readLine()
             val message = parseMessage(serverMessage)
             val fileName = message.data.fileName
+            val time = message.data.time
+            val senderName = message.data.senderName
             val fileByteArray = message.file
 
             if (!fileName.isNullOrEmpty() && fileByteArray.isNotEmpty()) {
-                val file1 = File(fileName)
+                val file1 = File(shapingFileName(fileName,senderName,time))
                 file1.createNewFile()
                 file1.writeBytes(fileByteArray)
             }

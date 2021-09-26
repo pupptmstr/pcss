@@ -26,13 +26,10 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
     val receiver = BufferedReader(InputStreamReader(client.getInputStream()))
     var name = ""
     var isSuccessfullyLogin = false
-    println("cl want to login")
     while (true) {
         val message = receiver.readLine()
-        println("i receive message $message")
         val parsedMessage = parseMessage(message)
         name = parsedMessage.data.senderName
-        println("Client name is $name")
         isSuccessfullyLogin = clientList.addNewClient(client, name)
         break
     }
