@@ -4,7 +4,6 @@ import java.io.File
 import java.util.*
 
 fun parseData(dataMessage: String): Data {
-    println("parseData()")
     val regex =
         """\[([A-Za-z]+)?\],\[([A-Za-z0-9]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z]+))?\]""".toRegex()
     val matchResult = regex.matchEntire(dataMessage)
@@ -21,7 +20,6 @@ fun parseData(dataMessage: String): Data {
 }
 
 fun parseHeader(headerMessage: String): Header {
-    println("parseHeader()")
     val regex =
         """\[([0-2])\],\[([01])\],\[([0-9]+)\]""".toRegex()
 
@@ -37,7 +35,6 @@ fun parseHeader(headerMessage: String): Header {
 }
 
 fun parseMessage(message: String) : Message {
-    println("parseMessages()")
     val splitMessage = message.split("_;_")
     val header = parseHeader(splitMessage[0])
     val data = parseData(splitMessage[1])
@@ -53,14 +50,14 @@ fun parseUserMessage(msg: String) : Pair<String,File?> {
     var filePath = splitMsg[splitMsg.size - 1]
     filePath = filePath.filterNot { str -> "]]".contains(str) }
     val file = File(filePath)
-    if (file.isFile) {
-        return when (splitMsg.size) {
+    return if (file.isFile) {
+        when (splitMsg.size) {
             1 -> Pair(msg, null)
             2 -> Pair(splitMsg[0], file)
             else -> Pair(collectMessage(splitMsg), file)
         }
     } else {
-        return Pair(msg, null)
+        Pair(msg, null)
     }
 
 }

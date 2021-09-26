@@ -1,7 +1,6 @@
 package com.monkeys.pcss.client
 
 import com.monkeys.pcss.models.message.*
-import com.monkeys.pcss.printHelp
 import com.monkeys.pcss.shapingFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -19,10 +18,7 @@ class Client(host: String, port: Int) {
     private var stillWorking = true
 
     suspend fun start() = coroutineScope {
-        println("Был запущен клиент")
-        printHelp()
         var nameExist = true
-
         println("Enter your nickname or \'q\' to exit.")
         when (val userInput = readLine()) {
             null -> {
@@ -41,11 +37,9 @@ class Client(host: String, port: Int) {
 
                 sender.write(message.getMessage())
                 sender.flush()
-                println("send message with name ${message.getMessage()}")
                 var messageInfo = ""
                 while (nameExist) {
                     val serverMessage = receiver.readLine()
-                    println(serverMessage)
                     val parseServerMessage = parseMessage(serverMessage)
                     messageInfo = parseServerMessage.data.messageText
                     val type = parseServerMessage.header.type
@@ -86,6 +80,7 @@ class Client(host: String, port: Int) {
 
     private fun sendingMessages() {
         while (stillWorking) {
+            print("Message: ")
             when (val userMessage = readLine()) {
                 "" -> continue
                 "q" -> {
@@ -98,9 +93,6 @@ class Client(host: String, port: Int) {
                     val file = parsedMsg.second
                     val fileName = file?.name
                     val fileByteArray = file?.readBytes()
-
-                    println(fileByteArray?.size ?: "no file")
-                    println(fileByteArray?.get(0) ?: "1 byte")
 
                     val data = Data(null, name, "", msg, fileName)
                     val header = Header(
@@ -117,7 +109,6 @@ class Client(host: String, port: Int) {
     }
 
     private fun receivingMessages() {
-        println("receivingMessages()")
         while (stillWorking) {
             val serverMessage = receiver.readLine()
             val message = parseMessage(serverMessage)

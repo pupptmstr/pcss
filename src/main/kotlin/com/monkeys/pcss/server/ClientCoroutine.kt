@@ -22,7 +22,6 @@ suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
 }
 
 fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
-    println("Receiving new client name...")
     val receiver = BufferedReader(InputStreamReader(client.getInputStream()))
     var name = ""
     var isSuccessfullyLogin = false
@@ -44,6 +43,7 @@ fun startCommunication(clientId: String, clientList: ClientList) {
         val message = receiver.readLine()
         val parsedMessage = parseMessage(message)
         if (parsedMessage.header.type == MessageType.MESSAGE) {
+            println("Got new message from ${parsedMessage.data.senderName}")
             val messageId = generateMessageId()
             val now = LocalTime.now()
             val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -63,11 +63,12 @@ fun startCommunication(clientId: String, clientList: ClientList) {
                     data.getServerMessage().toByteArray().size
                 ),
                 data,
-                file ?: ByteArray(0)
+                file
             )
             clientList.writeToEveryBody(resMessage)
         } else if (parsedMessage.data.messageText == "EXIT") {
             clientList.finishConnection(parsedMessage.data.senderName)
+            println("Got closing message from client with name ${parsedMessage.data.senderName}")
             isWorking = false
         } else {
             println("Got message with type '${parsedMessage.header.type}' and text '${parsedMessage.data.messageText}' from '${parsedMessage.data.senderName}'")
