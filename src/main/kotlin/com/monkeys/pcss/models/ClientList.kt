@@ -86,7 +86,7 @@ class ClientList() {
                 }
             } catch (e: Exception) {
                 println("Connection with client ${client.key} was closed!")
-                e.printStackTrace()
+                finishConnection(client.key)
             }
         }
         //println("text is $message")

@@ -2,7 +2,6 @@ package com.monkeys.pcss
 
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
-import java.time.ZoneId
 
 
 fun restoreArguments(args: List<String>): WorkType = when {
@@ -56,8 +55,4 @@ fun shapingFileName(fileName: String, senderName: String, time: String): String 
     builder.append(".")
     builder.append(split[1])
     return builder.toString()
-}
-
-fun getZoneOffset(): ZoneId {
-    return ZoneId.of(System.getProperty("user.timezone"))
 }

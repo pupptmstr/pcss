@@ -28,9 +28,8 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
         val message = receiver.readLine()
         val parsedMessage = parseMessage(message)
         name = parsedMessage.data.senderName
-        val zoneOffset = ZoneId.of(parsedMessage.data.messageText)
-        println(zoneOffset.toString())
-        isSuccessfullyLogin = clientList.addNewClient(client, name, zoneOffset)
+        val zoneId = ZoneId.of(parsedMessage.data.messageText)
+        isSuccessfullyLogin = clientList.addNewClient(client, name, zoneId)
         break
     }
     return Pair(isSuccessfullyLogin, name)
