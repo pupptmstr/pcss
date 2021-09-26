@@ -51,7 +51,7 @@ fun shapingFileName(fileName: String, senderName: String, time: String): String 
     builder.append("_")
     builder.append(senderName)
     builder.append("_")
-    builder.append(time)
+    builder.append(time.replace(":", "-"))
     builder.append(".")
     builder.append(split[1])
     return builder.toString()
