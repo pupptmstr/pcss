@@ -1,6 +1,7 @@
 package com.monkeys.pcss.models.message
 
 import java.io.File
+import java.util.*
 
 fun parseData(dataMessage: String): Data {
     val regex =
@@ -37,7 +38,7 @@ fun parseMessage(message: String) : Message {
     val splitMessage = message.split("_;_")
     val header = parseHeader(splitMessage[0])
     val data = parseData(splitMessage[1])
-    val file = if (splitMessage.size > 2) splitMessage[2].toByteArray() else ByteArray(0)
+    val file = if (splitMessage.size > 2) Base64.getDecoder().decode(splitMessage[2]) else ByteArray(0)
     return Message(header, data, file)
 }
 

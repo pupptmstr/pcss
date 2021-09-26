@@ -15,7 +15,7 @@ data class Message(
     }
 
     fun getMessage() =
-        "${header.getHeader()}${data.getServerMessage()}" + Base64.getEncoder().encodeToString(file)
+        "${header.getHeader()}${data.getServerMessage()}" + Base64.getEncoder().encodeToString(file) + "\n"
 
 
     override fun equals(other: Any?): Boolean {

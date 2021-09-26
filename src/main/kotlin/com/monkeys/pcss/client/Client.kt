@@ -9,7 +9,7 @@ import java.io.*
 import java.net.Socket
 import java.net.SocketException
 
-class Client (host: String, port: Int) {
+class Client(host: String, port: Int) {
 
     private var socket = Socket(host, port)
     private var receiver = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -34,7 +34,7 @@ class Client (host: String, port: Int) {
             }
             else -> {
 
-                val data = Data(null, userInput, "","", null)
+                val data = Data(null, userInput, "", "", null)
                 val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
                 val message = Message(header, data, ByteArray(0))
 
@@ -43,20 +43,21 @@ class Client (host: String, port: Int) {
                 println("send message with name ${message.getMessage()}")
                 var messageInfo = ""
                 while (nameExist) {
-                        val serverMessage = receiver.readLine()
-                        println(serverMessage)
-                        val parseServerMessage = parseMessage(serverMessage)
-                        messageInfo = parseServerMessage.data.messageText
-                        val type = parseServerMessage.header.type
-                        val senderName = parseServerMessage.data.senderName
-                        if (messageInfo == "Name is taken, please try to connect again"
-                            && type == MessageType.LOGIN && senderName == "server") {
-                            stillWorking = false
-                            nameExist = false
-                        } else {
-                            name = userInput
-                            nameExist = false
-                        }
+                    val serverMessage = receiver.readLine()
+                    println(serverMessage)
+                    val parseServerMessage = parseMessage(serverMessage)
+                    messageInfo = parseServerMessage.data.messageText
+                    val type = parseServerMessage.header.type
+                    val senderName = parseServerMessage.data.senderName
+                    if (messageInfo == "Name is taken, please try to connect again"
+                        && type == MessageType.LOGIN && senderName == "server"
+                    ) {
+                        stillWorking = false
+                        nameExist = false
+                    } else {
+                        name = userInput
+                        nameExist = false
+                    }
                 }
                 println(messageInfo)
                 println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
@@ -101,11 +102,14 @@ class Client (host: String, port: Int) {
                     println(fileByteArray?.get(0) ?: "1 byte")
 
                     val data = Data(null, name, "", msg, fileName)
-                    val header = Header(MessageType.MESSAGE, file != null,
-                        data.getServerMessage().toByteArray(Charsets.UTF_8).size)
+                    val header = Header(
+                        MessageType.MESSAGE, file != null,
+                        data.getServerMessage().toByteArray(Charsets.UTF_8).size
+                    )
                     val message = Message(header, data, fileByteArray ?: ByteArray(0))
                     val messageRes = message.getMessage()
                     sender.write(messageRes)
+                    sender.flush()
                 }
             }
         }
@@ -114,32 +118,18 @@ class Client (host: String, port: Int) {
     private fun receivingMessages() {
         while (stillWorking) {
 
-                val inputStreamStr = receiver.readLine()
-//                val serverMessage = inputStreamStr.first
-//                println(serverMessage)
-//                val parsedServerMessage = parseMessage(serverMessage)
-//                val senderName = parsedServerMessage.data.senderName
-//                val time = parsedServerMessage.data.time
-//                val message = parsedServerMessage.data.messageText
-//                val fileName = parsedServerMessage.data.fileName
-//
-//                val fileByteArray = substring(inputStreamStr.second,
-//                    parsedServerMessage.header.getHeader().toByteArray(Charsets.UTF_8).size + parsedServerMessage.header.dataSize)
-//
-//                if (fileName != null && fileByteArray != null) {
-//                    val file1 = File(fileName)
-//                    file1.createNewFile()
-//                    file1.writeBytes(fileByteArray)
-//                }
-//
-//                println(parsedServerMessage.data.getClientMessage())
-//
-//                val id = parsedServerMessage.data.messageId
-//                val dataSpec = Data(id, name, "","1", null)
-//                val headerSpec = Header(MessageType.SPECIAL, false, dataSpec.getServerMessage().length)
-//                val messageSpec = Message(headerSpec, dataSpec, ByteArray(0))
-//                sender.write(messageSpec.getMessage())
+            val serverMessage = receiver.readLine()
+            val message = parseMessage(serverMessage)
+            val fileName = message.data.fileName
+            val fileByteArray = message.file
 
+            if (fileName != null && fileByteArray.isEmpty()) {
+                val file1 = File(fileName)
+                file1.createNewFile()
+                file1.writeBytes(fileByteArray)
             }
+
+            println(message.data.getClientMessage())
+        }
     }
 }

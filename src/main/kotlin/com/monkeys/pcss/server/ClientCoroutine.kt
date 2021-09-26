@@ -28,13 +28,13 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
     var isSuccessfullyLogin = false
     println("cl want to login")
     while (true) {
-            val message = receiver.readLine()
-            println("i receive message $message")
-            val parsedMessage = parseMessage(message)
-            name = parsedMessage.data.senderName
-            println("Client name is $name")
-            isSuccessfullyLogin = clientList.addNewClient(client, name)
-            break
+        val message = receiver.readLine()
+        println("i receive message $message")
+        val parsedMessage = parseMessage(message)
+        name = parsedMessage.data.senderName
+        println("Client name is $name")
+        isSuccessfullyLogin = clientList.addNewClient(client, name)
+        break
     }
     return Pair(isSuccessfullyLogin, name)
 }
@@ -44,36 +44,36 @@ fun startCommunication(clientId: String, clientList: ClientList) {
     var isWorking = true
     val receiver = BufferedReader(InputStreamReader(clientList.getInputStream(clientId)))
     while (isWorking) {
-            val message = receiver.readLine()
-            val parsedMessage = parseMessage(message)
-            if (parsedMessage.header.type == MessageType.MESSAGE) {
-                val messageId = generateMessageId()
-                val now = LocalTime.now()
-                val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
-                val file = parsedMessage.file
+        val message = receiver.readLine()
+        val parsedMessage = parseMessage(message)
+        if (parsedMessage.header.type == MessageType.MESSAGE) {
+            val messageId = generateMessageId()
+            val now = LocalTime.now()
+            val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
+            val file = parsedMessage.file
 
-                val data = Data(
-                    messageId,
-                    parsedMessage.data.senderName,
-                    time,
-                    parsedMessage.data.messageText,
-                    parsedMessage.data.fileName
-                )
-                val resMessage = Message(
-                    Header(
-                        MessageType.MESSAGE,
-                        parsedMessage.header.isFileAttached,
-                        data.getServerMessage().toByteArray().size
-                        ),
-                    data,
-                    file ?: ByteArray(0)
-                )
-                clientList.writeToEveryBody(resMessage)
-            } else if (parsedMessage.data.messageText == "EXIT") {
-                clientList.finishConnection(parsedMessage.data.senderName)
-                isWorking = false
-            } else {
-                println("Got message with type '${parsedMessage.header.type}' and text '${parsedMessage.data.messageText}' from '${parsedMessage.data.senderName}'")
-            }
+            val data = Data(
+                messageId,
+                parsedMessage.data.senderName,
+                time,
+                parsedMessage.data.messageText,
+                parsedMessage.data.fileName
+            )
+            val resMessage = Message(
+                Header(
+                    MessageType.MESSAGE,
+                    parsedMessage.header.isFileAttached,
+                    data.getServerMessage().toByteArray().size
+                ),
+                data,
+                file ?: ByteArray(0)
+            )
+            clientList.writeToEveryBody(resMessage)
+        } else if (parsedMessage.data.messageText == "EXIT") {
+            clientList.finishConnection(parsedMessage.data.senderName)
+            isWorking = false
+        } else {
+            println("Got message with type '${parsedMessage.header.type}' and text '${parsedMessage.data.messageText}' from '${parsedMessage.data.senderName}'")
+        }
     }
 }
