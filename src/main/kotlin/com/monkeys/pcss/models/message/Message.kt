@@ -1,5 +1,7 @@
 package com.monkeys.pcss.models.message
 
+import java.util.*
+
 data class Message(
     var header: Header = Header(),
     var data: Data = Data(),
@@ -13,7 +15,7 @@ data class Message(
     }
 
     fun getMessage() =
-        "${header.getHeader()}${data.getServerMessage()}".toByteArray(Charsets.UTF_8) + file
+        "${header.getHeader()}${data.getServerMessage()}" + Base64.getEncoder().encodeToString(file)
 
 
     override fun equals(other: Any?): Boolean {

@@ -4,8 +4,8 @@ import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
 import java.io.InputStream
 
-const val BYTE_ARRAY_SIZE = 268435456/4
-val BYTE_ARRAY = ByteArray(BYTE_ARRAY_SIZE)
+//const val BYTE_ARRAY_SIZE = 268435456/4
+//val BYTE_ARRAY = ByteArray(BYTE_ARRAY_SIZE)
 
 fun restoreArguments(args: List<String>): WorkType = when {
     //TODO(обработать флаги для передачи порта с ip")
@@ -48,20 +48,20 @@ fun generateMessageId(): String {
     return "testNew"
 }
 
-fun readFromInputSteam(inputStream: InputStream): Pair<String, ByteArray> {
-    val byteArray = ByteArray(inputStream.available())
-    inputStream.read(byteArray, 0, inputStream.available())
-    return Pair(String(byteArray).replace("\u0000", ""), byteArray)
-}
-
-fun substring(array: ByteArray, start: Int): ByteArray? {
-    return substring(array, start, array.size)
-}
-
-fun substring(array: ByteArray?, start: Int, end: Int): ByteArray? {
-    if (end <= start) return null
-    val length = end - start
-    val newArray = ByteArray(length)
-    System.arraycopy(array, start, newArray, 0, length)
-    return newArray
-}
+//fun readFromInputSteam(inputStream: InputStream): Pair<String, ByteArray> {
+//    val byteArray = ByteArray(inputStream.available())
+//    inputStream.read(byteArray, 0, inputStream.available())
+//    return Pair(String(byteArray).replace("\u0000", ""), byteArray)
+//}
+//
+//fun substring(array: ByteArray, start: Int): ByteArray? {
+//    return substring(array, start, array.size)
+//}
+//
+//fun substring(array: ByteArray?, start: Int, end: Int): ByteArray? {
+//    if (end <= start) return null
+//    val length = end - start
+//    val newArray = ByteArray(length)
+//    System.arraycopy(array, start, newArray, 0, length)
+//    return newArray
+//}
