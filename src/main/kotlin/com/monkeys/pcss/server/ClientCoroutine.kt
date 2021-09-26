@@ -7,7 +7,7 @@ import kotlinx.coroutines.delay
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
-import java.time.ZoneOffset
+import java.time.ZoneId
 
 
 suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
@@ -28,7 +28,8 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
         val message = receiver.readLine()
         val parsedMessage = parseMessage(message)
         name = parsedMessage.data.senderName
-        val zoneOffset = ZoneOffset.of(parsedMessage.data.messageText)
+        val zoneOffset = ZoneId.of(parsedMessage.data.messageText)
+        println(zoneOffset.toString())
         isSuccessfullyLogin = clientList.addNewClient(client, name, zoneOffset)
         break
     }

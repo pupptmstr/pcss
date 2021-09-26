@@ -10,16 +10,16 @@ import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.net.Socket
 import java.time.LocalTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 class ClientList() {
     private val clients = Collections.synchronizedMap(mutableMapOf<String, Pair<InputStream, OutputStream>>())
     private val socketList = Collections.synchronizedMap(mutableMapOf<String, Socket>())
-    private val zoneOffsets = Collections.synchronizedMap(mutableMapOf<String, ZoneOffset>())
+    private val zones = Collections.synchronizedMap(mutableMapOf<String, ZoneId>())
 
-    fun addNewClient(socket: Socket, newId: String, zoneOffset: ZoneOffset): Boolean {
+    fun addNewClient(socket: Socket, newId: String, zoneId: ZoneId): Boolean {
         val sender = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
         return if (clients.keys.contains(newId)) {
             val data = Data(senderName = "server", messageText = "Name is taken, please try to connect again")
@@ -30,7 +30,7 @@ class ClientList() {
         } else {
             clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
             socketList[newId] = socket
-            zoneOffsets[newId] = zoneOffset
+            zones[newId] = zoneId
             val data = Data(senderName = "server", messageText = "Great, your name now is $newId, you can communicate")
             val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
             sender.write(Message(header, data).getMessage())
@@ -62,7 +62,7 @@ class ClientList() {
         clients.forEach { client ->
             try {
                 if (client.key != name) {
-                    val now = LocalTime.now().atOffset(zoneOffsets[client.key])
+                    val now = LocalTime.now(zones[client.key])
                     val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
                     val data = Data(
                         message.data.messageId,
