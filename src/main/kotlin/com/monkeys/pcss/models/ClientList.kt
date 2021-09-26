@@ -20,22 +20,30 @@ class ClientList() {
     private val zones = Collections.synchronizedMap(mutableMapOf<String, ZoneId>())
 
     fun addNewClient(socket: Socket, newId: String, zoneId: ZoneId): Boolean {
-        val sender = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
-        return if (clients.keys.contains(newId)) {
-            val data = Data(senderName = "server", messageText = "Name is taken, please try to connect again")
-            val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
-            sender.write(Message(header, data).getMessage())
-            sender.flush()
-            false
-        } else {
-            clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
-            socketList[newId] = socket
-            zones[newId] = zoneId
-            val data = Data(senderName = "server", messageText = "Great, your name now is $newId, you can communicate")
-            val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
-            sender.write(Message(header, data).getMessage())
-            sender.flush()
-            true
+        try {
+            val sender = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
+            return if (clients.keys.contains(newId)) {
+                val data = Data(senderName = "server", messageText = "Name is taken, please try to connect again")
+                val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
+                sender.write(Message(header, data).getMessage())
+                sender.flush()
+                false
+            } else {
+                clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
+                socketList[newId] = socket
+                zones[newId] = zoneId
+                val data =
+                    Data(senderName = "server", messageText = "Great, your name now is $newId, you can communicate")
+                val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
+                sender.write(Message(header, data).getMessage())
+                sender.flush()
+                true
+            }
+        } catch (e: Exception) {
+            socket.close()
+            println("Troubles while login new user($newId), try again later!")
+            e.printStackTrace()
+            return false
         }
     }
 
@@ -89,6 +97,5 @@ class ClientList() {
                 finishConnection(client.key)
             }
         }
-        //println("text is $message")
     }
 }
