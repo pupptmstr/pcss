@@ -9,7 +9,9 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.net.Socket
+import java.time.LocalTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class ClientList() {
@@ -60,8 +62,26 @@ class ClientList() {
         clients.forEach { client ->
             try {
                 if (client.key != name) {
+                    val now = LocalTime.now().atOffset(zoneOffsets[client.key])
+                    val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
+                    val data = Data(
+                        message.data.messageId,
+                        message.data.senderName,
+                        time,
+                        message.data.messageText,
+                        message.data.fileName
+                    )
+                    val resMessage = Message(
+                        Header(
+                            MessageType.MESSAGE,
+                            message.header.isFileAttached,
+                            data.getServerMessage().toByteArray().size
+                        ),
+                        data,
+                        message.file
+                    )
                     val sender = BufferedWriter(OutputStreamWriter(client.value.second))
-                    sender.write(message.getMessage())
+                    sender.write(resMessage.getMessage())
                     sender.flush()
                 }
             } catch (e: Exception) {

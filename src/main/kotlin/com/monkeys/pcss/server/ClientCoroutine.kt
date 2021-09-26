@@ -7,9 +7,7 @@ import kotlinx.coroutines.delay
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
-import java.time.LocalTime
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 
 suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
@@ -47,14 +45,12 @@ fun startCommunication(clientId: String, clientList: ClientList) {
         if (parsedMessage.header.type == MessageType.MESSAGE) {
             println("Got new message from ${parsedMessage.data.senderName}")
             val messageId = generateMessageId()
-            val now = LocalTime.now()
-            val time = now.format(DateTimeFormatter.ofPattern("HH:mm"))
             val file = parsedMessage.file
 
             val data = Data(
                 messageId,
                 parsedMessage.data.senderName,
-                time,
+                "04:20",
                 parsedMessage.data.messageText,
                 parsedMessage.data.fileName
             )
