@@ -30,7 +30,7 @@ class Client (host: String, port: Int) {
                 stillWorking = false
             }
             "q" -> {
-                sender.write("EXIT".toByteArray())
+                sender.write("EXIT".toByteArray(Charsets.UTF_8))
                 stillWorking = false
             }
             else -> {
@@ -87,7 +87,7 @@ class Client (host: String, port: Int) {
             when (val userMessage = readLine()) {
                 "" -> continue
                 "q" -> {
-                    sender.write("EXIT".toByteArray())
+                    sender.write("EXIT".toByteArray(Charsets.UTF_8))
                     stillWorking = false
                 }
                 else -> {
@@ -98,7 +98,7 @@ class Client (host: String, port: Int) {
                     val fileByteArray = file?.readBytes()
                     val data = Data(null, name, "", msg, fileName)
                     val header = Header(MessageType.MESSAGE, file != null,
-                        data.getServerMessage().toByteArray().size)
+                        data.getServerMessage().toByteArray(Charsets.UTF_8).size)
                     val message = Message(header, data, fileByteArray ?: ByteArray(0))
                     val messageRes = message.getMessage()
                     sender.write(messageRes)
@@ -120,7 +120,7 @@ class Client (host: String, port: Int) {
                 val fileName = parsedServerMessage.data.fileName
 
                 val fileByteArray = substring(inputStreamStr.second,
-                    parsedServerMessage.header.getHeader().toByteArray().size + parsedServerMessage.header.dataSize)
+                    parsedServerMessage.header.getHeader().toByteArray(Charsets.UTF_8).size + parsedServerMessage.header.dataSize)
 
                 if (fileName != null && fileByteArray != null) {
                     val file1 = File(fileName)

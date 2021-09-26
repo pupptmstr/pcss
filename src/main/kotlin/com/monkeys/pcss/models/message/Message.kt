@@ -13,7 +13,7 @@ data class Message(
     }
 
     fun getMessage() =
-        "${header.getHeader()}${data.getServerMessage()}".toByteArray() + file
+        "${header.getHeader()}${data.getServerMessage()}".toByteArray(Charsets.UTF_8) + file
 
 
     override fun equals(other: Any?): Boolean {

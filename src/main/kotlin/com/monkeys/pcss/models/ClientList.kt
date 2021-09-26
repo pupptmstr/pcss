@@ -50,8 +50,13 @@ class ClientList() {
     fun writeToEveryBody(message: Message) {
         val name = message.data.senderName
         clients.forEach { client ->
-            if (client.key != name) {
-                client.value.second.write(message.getMessage())
+            try {
+                if (client.key != name) {
+                    client.value.second.write(message.getMessage())
+                }
+            } catch (e: Exception) {
+                println("Connection with client ${client.key} was closed!")
+                e.printStackTrace()
             }
         }
         println("text is $message")
