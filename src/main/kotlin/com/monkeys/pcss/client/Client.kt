@@ -1,5 +1,6 @@
 package com.monkeys.pcss.client
 
+import com.monkeys.pcss.getZoneOffset
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.shapingFileName
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,7 @@ class Client(host: String, port: Int) {
             }
             else -> {
                 val decodedUserInput = String(userInput.toByteArray(Charsets.UTF_8), Charsets.UTF_8)
-                val data = Data(null, decodedUserInput, "", "", null)
+                val data = Data(null, decodedUserInput, "", getZoneOffset().toString(), null)
                 val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
                 val message = Message(header, data, ByteArray(0))
 

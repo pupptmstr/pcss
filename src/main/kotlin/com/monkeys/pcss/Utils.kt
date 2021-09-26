@@ -2,6 +2,10 @@ package com.monkeys.pcss
 
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+
 
 fun restoreArguments(args: List<String>): WorkType = when {
     args.isEmpty() -> {
@@ -54,4 +58,10 @@ fun shapingFileName(fileName: String, senderName: String, time: String): String 
     builder.append(".")
     builder.append(split[1])
     return builder.toString()
+}
+
+fun getZoneOffset(): ZoneOffset {
+    val now = LocalDateTime.now()
+    val zone = ZoneId.of(System.getProperty("user.timezone"))
+    return zone.rules.getOffset(now)
 }

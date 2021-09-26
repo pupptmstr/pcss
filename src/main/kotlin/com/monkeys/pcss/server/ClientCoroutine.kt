@@ -8,6 +8,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 
@@ -29,7 +30,8 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
         val message = receiver.readLine()
         val parsedMessage = parseMessage(message)
         name = parsedMessage.data.senderName
-        isSuccessfullyLogin = clientList.addNewClient(client, name)
+        val zoneOffset = ZoneOffset.of(parsedMessage.data.messageText)
+        isSuccessfullyLogin = clientList.addNewClient(client, name, zoneOffset)
         break
     }
     return Pair(isSuccessfullyLogin, name)

@@ -9,13 +9,15 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.net.Socket
+import java.time.ZoneOffset
 import java.util.*
 
 class ClientList() {
     private val clients = Collections.synchronizedMap(mutableMapOf<String, Pair<InputStream, OutputStream>>())
     private val socketList = Collections.synchronizedMap(mutableMapOf<String, Socket>())
+    private val zoneOffsets = Collections.synchronizedMap(mutableMapOf<String, ZoneOffset>())
 
-    fun addNewClient(socket: Socket, newId: String): Boolean {
+    fun addNewClient(socket: Socket, newId: String, zoneOffset: ZoneOffset): Boolean {
         val sender = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
         return if (clients.keys.contains(newId)) {
             val data = Data(senderName = "server", messageText = "Name is taken, please try to connect again")
@@ -26,6 +28,7 @@ class ClientList() {
         } else {
             clients[newId] = Pair(socket.getInputStream(), socket.getOutputStream())
             socketList[newId] = socket
+            zoneOffsets[newId] = zoneOffset
             val data = Data(senderName = "server", messageText = "Great, your name now is $newId, you can communicate")
             val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
             sender.write(Message(header, data).getMessage())
