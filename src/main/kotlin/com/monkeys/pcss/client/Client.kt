@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import java.io.*
 import java.net.Socket
 import java.net.SocketException
+import java.util.*
 
 class Client(host: String, port: Int) {
 
@@ -31,7 +32,7 @@ class Client(host: String, port: Int) {
             }
             else -> {
                 val decodedUserInput = String(userInput.toByteArray(Charsets.UTF_8), Charsets.UTF_8)
-                val data = Data(null, decodedUserInput, "", System.getProperty("user.timezone"), null)
+                val data = Data(null, decodedUserInput, "", TimeZone.getDefault().id, null)
                 val header = Header(MessageType.LOGIN, false, data.getServerMessage().length)
                 val message = Message(header, data, ByteArray(0))
 
