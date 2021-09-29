@@ -1,7 +1,6 @@
 package com.monkeys.pcss.models.message
 
 import java.io.File
-import java.util.*
 
 fun parseData(dataMessage: String): Data {
     val regex =
@@ -38,8 +37,7 @@ fun parseMessage(message: String) : Message {
     val splitMessage = message.split("_;_")
     val header = parseHeader(splitMessage[0])
     val data = parseData(splitMessage[1])
-    val file = if (splitMessage.size > 2) Base64.getDecoder().decode(splitMessage[2]) else ByteArray(0)
-    return Message(header, data, file)
+    return Message(header, data)
 }
 
 fun parseHostAndPort(arg: String) : Pair<String, Int> =
@@ -50,14 +48,14 @@ fun parseUserMessage(msg: String) : Pair<String,File?> {
     var filePath = splitMsg[splitMsg.size - 1]
     filePath = filePath.filterNot { str -> "]]".contains(str) }
     val file = File(filePath)
-    return if (file.isFile) {
-        when (splitMsg.size) {
+    if (file.isFile) {
+        return when (splitMsg.size) {
             1 -> Pair(msg, null)
             2 -> Pair(splitMsg[0], file)
             else -> Pair(collectMessage(splitMsg), file)
         }
     } else {
-        Pair(msg, null)
+        return Pair(msg, null)
     }
 
 }
