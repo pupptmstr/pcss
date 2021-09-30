@@ -4,11 +4,8 @@ import com.monkeys.pcss.generateMessageId
 import com.monkeys.pcss.models.ClientList
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readMessageFromInputSteam
-import kotlinx.coroutines.delay
 import java.net.Socket
-import java.time.LocalTime
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 
 suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
@@ -16,7 +13,6 @@ suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
     if (loginRes.first) {
         startCommunication(loginRes.second, clientList)
     } else {
-        delay(5000)
         client.close()
     }
 }

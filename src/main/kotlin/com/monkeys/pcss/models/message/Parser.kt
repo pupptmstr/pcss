@@ -3,15 +3,16 @@ package com.monkeys.pcss.models.message
 import java.io.File
 
 fun parseData(dataMessage: String): Data {
+    val timeRegex = """[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]+\+[0-9]{2}:[0-9]{2}\{[A-Za-z/]+\}"""
     val regex =
-        """\[([A-Za-z0-9]+)?\],\[([A-Za-z0-9А-Яа-я]+)\],\[((([0,1][0-9])|(2[0-3])):[0-5][0-9])?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z0-9A-Z]+))?\]""".toRegex()
+        """\[([A-Za-z0-9]+)?\],\[([A-Za-z0-9А-Яа-я]+)\],\[($timeRegex)?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z0-9A-Z]+))?\]""".toRegex()
     val matchResult = regex.matchEntire(dataMessage)
     return if (matchResult != null) {
         val messageId = matchResult.groupValues[1]
         val senderName = matchResult.groupValues[2]
         val time = matchResult.groupValues[3]
-        val messageText = matchResult.groupValues[7]
-        val fileName = matchResult.groupValues[8]
+        val messageText = matchResult.groupValues[4]
+        val fileName = matchResult.groupValues[5]
         Data(messageId, senderName, time, messageText, fileName)
     } else {
         Data()
