@@ -57,7 +57,7 @@ class Client(host: String, port: Int) {
 
                         val serverMessage = readMessageFromInputStream(receiver)
                         val parsedServerMessage = parseMessage(serverMessage)
-                        messageInfo = parsedServerMessage.data.messageText
+                        messageInfo = parsedServerMessage!!.data.messageText
                         val type = parsedServerMessage.header.type
                         val senderName = parsedServerMessage.data.senderName
                         if (messageInfo == "Name is taken, please try to connect again"
@@ -132,6 +132,7 @@ class Client(host: String, port: Int) {
             }
         } catch (e: Exception) {
             println("!E: There is an ERROR while sending ur message. Probably the server was destroyed by evil goblins.")
+            e.printStackTrace()
             stopConnection()
         }
     }
@@ -140,41 +141,42 @@ class Client(host: String, port: Int) {
         try {
             while (stillWorking) {
                 if (receiver.available() > 0) {
-
                     val serverMessage = readMessageFromInputStream(receiver)
                     val parsedServerMessage = parseMessage(serverMessage)
+                    if (parsedServerMessage != null) {
+                        val serverData = parsedServerMessage.data
 
-                    val serverData = parsedServerMessage.data
+                        val serverZoneDateTime = serverData.time.replace("{", "[").replace("}", "]")
+                        val id = TimeZone.getDefault().id
+                        val parsedSZDT = ZonedDateTime.parse(serverZoneDateTime)
+                        val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id))
+                            .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
 
-                    val serverZoneDateTime = serverData.time.replace("{", "[").replace("}", "]")
-                    val id = TimeZone.getDefault().id
-                    val parsedSZDT = ZonedDateTime.parse(serverZoneDateTime)
-                    val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id))
-                        .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
+                        val finalData = Data(
+                            serverData.messageId, serverData.senderName,
+                            clientSZDT, serverData.messageText, serverData.fileName
+                        )
 
-                    val finalData = Data(
-                        serverData.messageId, serverData.senderName,
-                        clientSZDT, serverData.messageText, serverData.fileName
-                    )
+                        println(finalData.getClientMessage())
+                        print("m: ")
 
-                    println(finalData.getClientMessage())
-                    print("m: ")
-
-                val size = parsedServerMessage.header.fileSize
-                val byteArray = ByteArray(size)
-                if (parsedServerMessage.header.isFileAttached) {
-                    receiver.read(byteArray)
-                    val fileName = finalData.fileName
-                    val senderName = finalData.senderName
-                    val time = finalData.time
-                    val file1 = File(shapingFileName(fileName!!, senderName, time))
-                    file1.createNewFile()
-                    file1.writeBytes(byteArray)
+                        val size = parsedServerMessage.header.fileSize
+                        val byteArray = ByteArray(size)
+                        if (parsedServerMessage.header.isFileAttached) {
+                            receiver.read(byteArray)
+                            val fileName = finalData.fileName
+                            val senderName = finalData.senderName
+                            val time = finalData.time
+                            val file1 = File(shapingFileName(fileName!!, senderName, time))
+                            file1.createNewFile()
+                            file1.writeBytes(byteArray)
+                        }
+                    }
                 }
             }
-        }
         } catch (e: Exception) {
             println("!E: There is an ERROR while receiving new messages. Probably the server was destroyed by evil goblins.")
+            e.printStackTrace()
             stopConnection()
         }
     }

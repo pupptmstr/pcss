@@ -34,11 +34,13 @@ fun parseHeader(headerMessage: String): Header {
     }
 }
 
-fun parseMessage(message: String) : Message {
-    val splitMessage = message.split("_;_")
-    val header = parseHeader(splitMessage[0])
-    val data = parseData(splitMessage[1])
-    return Message(header, data)
+fun parseMessage(message: String) : Message? {
+    return if (!message.isNullOrEmpty()) {
+        val splitMessage = message.split("_;_")
+        val header = parseHeader(splitMessage[0])
+        val data = parseData(splitMessage[1])
+        Message(header, data)
+    } else null
 }
 
 fun parseHostAndPort(arg: String) : Pair<String, Int> {

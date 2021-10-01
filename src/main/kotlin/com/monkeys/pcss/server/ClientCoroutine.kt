@@ -26,7 +26,7 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
             if (receiver.available() > 0) {
                 val message = readMessageFromInputStream(receiver)
                 val parsedMessage = parseMessage(message)
-                name = parsedMessage.data.senderName
+                name = parsedMessage!!.data.senderName
                 isSuccessfullyLogin = clientList.addNewClient(client, name)
                 break
             }
@@ -49,7 +49,7 @@ fun startCommunication(clientId: String, clientList: ClientList) {
                 val message = readMessageFromInputStream(receiver)
                 val parsedMessage = parseMessage(message)
 
-                val size = parsedMessage.header.fileSize
+                val size = parsedMessage!!.header.fileSize
                 val byteArray = ByteArray(size)
                 if (parsedMessage.header.isFileAttached) {
                     receiver.read(byteArray)

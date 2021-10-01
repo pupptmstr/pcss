@@ -6,7 +6,7 @@ data class Message(
 ) {
     constructor(message: String) : this() {
         val parsedMessage = parseMessage(message)
-        header = parsedMessage.header
+        header = parsedMessage!!.header
         data = parsedMessage.data
     }
 
