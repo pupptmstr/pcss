@@ -3,6 +3,7 @@ package com.monkeys.pcss.client
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readMessageFromInputSteam
 import com.monkeys.pcss.send
+import com.monkeys.pcss.shapingFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -63,14 +64,15 @@ class Client (host: String, port: Int) {
                             && type == MessageType.LOGIN && senderName == "server") {
                             stillWorking = false
                             nameExist = false
+                            println(messageInfo)
                         } else {
                             name = userInput
                             nameExist = false
+                            println(messageInfo)
+                            println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
                         }
                     }
                 }
-                println(messageInfo)
-                println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
             }
         }
         if (nameExist) {
@@ -145,8 +147,10 @@ class Client (host: String, port: Int) {
                 val byteArray = ByteArray(size)
                 if (parsedServerMessage.header.isFileAttached) {
                     receiver.read(byteArray)
-                    val fileName = parsedServerMessage.data.fileName
-                    val file1 = File(fileName)
+                    val fileName = finalData.fileName
+                    val senderName = finalData.senderName
+                    val time = finalData.time
+                    val file1 = File(shapingFileName(fileName!!, senderName, time))
                     file1.createNewFile()
                     file1.writeBytes(byteArray)
                 }
