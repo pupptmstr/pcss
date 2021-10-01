@@ -98,8 +98,8 @@ class Client(host: String, port: Int) {
                     else -> {
                         val parsedMessage = parseUserMessage(userMessage.toString())
                         val msg = parsedMessage.first
-                        val file = parsedMessage.second
-                        val fileName = file?.name
+                        var file = parsedMessage.second
+                        var fileName = file?.name
                         var fileByteArray = ByteArray(0)
 
                         if (file != null) {
@@ -107,6 +107,8 @@ class Client(host: String, port: Int) {
                             val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
 
                             if (!setOf("image", "video", "audio").contains(fileType)) {
+                                fileName = ""
+                                file = null
                                 println("You can only attach media files, any others may be unsafe. Your file was not attached")
                             } else {
                                 fileByteArray = file.readBytes()
