@@ -30,7 +30,6 @@ class Client(host: String, port: Int) {
 
     suspend fun start() = coroutineScope {
 
-        var nameExist = true
         var nameExist = false
         var isSingingInNow = true
         println("Enter your nickname or \'q\' to exit.")
