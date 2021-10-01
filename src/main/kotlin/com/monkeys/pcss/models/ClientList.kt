@@ -18,7 +18,7 @@ class ClientList() {
     private val socketList = Collections.synchronizedMap(mutableMapOf<String, Socket>())
 
     fun addNewClient(socket: Socket, newId: String): Boolean {
-        return if (clients.keys.contains(newId)) {
+        return if (clients.keys.contains(newId) || newId == "server") {
             val data = Data(senderName = "server", messageText =
             "Name is taken, please try to connect again")
             val header = Header(MessageType.LOGIN, false, 0)
@@ -56,6 +56,7 @@ class ClientList() {
 
     fun writeToEveryBody(message: Message, fileByteArray: ByteArray) {
         val name = message.data.senderName
+        val names = mutableListOf<String>()
         clients.forEach { client ->
             try {
                 if (client.key != name) {
@@ -64,12 +65,14 @@ class ClientList() {
                     if (fileByteArray.isNotEmpty()) {
                         send(sender,fileByteArray)
                     }
+                    names.add(client.key)
                 }
             } catch (e: Exception) {
-                println("Connection with client ${client.key} was closed!")
-                e.printStackTrace()
+                println("!E: Connection with client ${client.key} was closed!")
+                names.remove(client.key)
+                finishConnection(client.key)
             }
         }
-        println("text is $message")
+        println("Message '${String(message.getMessage())}' was send to this clients: $names")
     }
 }

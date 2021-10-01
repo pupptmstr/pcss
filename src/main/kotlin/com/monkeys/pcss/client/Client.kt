@@ -1,7 +1,7 @@
 package com.monkeys.pcss.client
 
 import com.monkeys.pcss.models.message.*
-import com.monkeys.pcss.readMessageFromInputSteam
+import com.monkeys.pcss.readMessageFromInputStream
 import com.monkeys.pcss.send
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -27,7 +27,8 @@ class Client (host: String, port: Int) {
 
     suspend fun start() = coroutineScope {
 
-        var nameExist = true
+        var nameExist = false
+        var isSingingInNow = true
 
         println("Enter your nickname or \'q\' to exit.")
 
@@ -49,10 +50,10 @@ class Client (host: String, port: Int) {
 
                 var messageInfo = ""
 
-                while (nameExist) {
+                while (isSingingInNow) {
                     if (receiver.available() > 0) {
 
-                        val serverMessage = readMessageFromInputSteam(receiver)
+                        val serverMessage = readMessageFromInputStream(receiver)
                         val parsedServerMessage = parseMessage(serverMessage)
                         messageInfo = parsedServerMessage.data.messageText
                         val type = parsedServerMessage.header.type
@@ -60,60 +61,71 @@ class Client (host: String, port: Int) {
                         if (messageInfo == "Name is taken, please try to connect again"
                             && type == MessageType.LOGIN && senderName == "server") {
                             stillWorking = false
-                            nameExist = false
+                            nameExist = true
                         } else {
                             name = userInput
                             nameExist = false
                         }
+                        isSingingInNow = false
                     }
                 }
                 println(messageInfo)
-                println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
+
             }
         }
         if (nameExist) {
             stopConnection()
+        } else {
+            launch(Dispatchers.IO) { sendingMessages() }
+            launch(Dispatchers.IO) { receivingMessages() }
         }
-
-        launch(Dispatchers.IO) { sendingMessages() }
-        launch(Dispatchers.IO) { receivingMessages() }
     }
 
     private fun sendingMessages() {
-        while (stillWorking) {
-            when (val userMessage = readLine()) {
-                "" -> continue
-                "q" -> {
-                    send(sender, "EXIT".toByteArray())
-                    stillWorking = false
-                }
-                else -> {
-                    val parsedMessage = parseUserMessage(userMessage.toString())
-                    val msg = parsedMessage.first
-                    val file = parsedMessage.second
-                    val fileName = file?.name
-                    val fileByteArray = file?.readBytes()
+        println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
+        try {
+            while (stillWorking) {
+                print("->:")
+                when (val userMessage = readLine()) {
+                    "" -> continue
+                    "q" -> {
+                        send(sender, "EXIT".toByteArray())
+                        stillWorking = false
+                    }
+                    else -> {
+                        val parsedMessage = parseUserMessage(userMessage.toString())
+                        val msg = parsedMessage.first
+                        val file = parsedMessage.second
+                        val fileName = file?.name
+                        val fileByteArray = file?.readBytes()
 
-                    val data = Data(null, name, "", msg, fileName)
-                    val header = Header(MessageType.MESSAGE, file != null,
-                        fileByteArray?.size ?: 0)
-                    val message = Message(header, data)
+                        val data = Data(null, name, "", msg, fileName)
+                        val header = Header(
+                            MessageType.MESSAGE, file != null,
+                            fileByteArray?.size ?: 0
+                        )
+                        val message = Message(header, data)
 
-                    send(sender, message.getMessage())
+                        send(sender, message.getMessage())
 
-                    if (header.isFileAttached) {
-                        send(sender, fileByteArray ?: ByteArray(0))
+                        if (header.isFileAttached) {
+                            send(sender, fileByteArray ?: ByteArray(0))
+                        }
                     }
                 }
             }
+        } catch (e: Exception) {
+            println("!E: There is an ERROR while sending ur message. Probably the server was destroyed by evil goblins.")
+            stopConnection()
         }
     }
 
     private fun receivingMessages() {
+        try {
         while (stillWorking) {
             if (receiver.available() > 0) {
 
-                val serverMessage = readMessageFromInputSteam(receiver)
+                val serverMessage = readMessageFromInputStream(receiver)
                 val parsedServerMessage = parseMessage(serverMessage)
 
                 val serverData = parsedServerMessage.data
@@ -136,13 +148,16 @@ class Client (host: String, port: Int) {
 
                 val fileName = parsedServerMessage.data.fileName
 
-
-                if (fileName != null) {
+                if (!fileName.isNullOrEmpty() && parsedServerMessage.header.isFileAttached) {
                     val file1 = File(fileName)
                     file1.createNewFile()
                     file1.writeBytes(byteArray)
                 }
             }
+        }
+        } catch (e: Exception) {
+            println("!E: There is an ERROR while receiving new messages. Probably the server was destroyed by evil goblins.")
+            stopConnection()
         }
     }
 
@@ -153,8 +168,7 @@ class Client (host: String, port: Int) {
             socket.close()
             println("Bye!")
         } catch (e: SocketException) {
-            println("ERROR! Socket wasn't closed!")
-            e.printStackTrace()
+            println("ERROR! Socket wasn't closed by client(probably it was closed by server)!")
         }
     }
 }

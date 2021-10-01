@@ -48,7 +48,7 @@ fun generateMessageId(): String {
     return "testNew"
 }
 
-fun readMessageFromInputSteam(inputStream: InputStream): String {
+fun readMessageFromInputStream(inputStream: InputStream): String {
     val byteArray = ByteArray(inputStream.available())
     inputStream.read(byteArray)
     return String(byteArray).replace("\u0000", "")
