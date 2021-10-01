@@ -55,6 +55,7 @@ fun readMessageFromInputStream(inputStream: InputStream): String {
 
 fun send(outputStream: OutputStream, byteArray: ByteArray) {
     outputStream.write(byteArray)
+    outputStream.flush()
 }
 
 fun shapingFileName(fileName: String, senderName: String, time: String): String {
