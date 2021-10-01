@@ -69,6 +69,7 @@ class ClientList() {
                 }
             } catch (e: Exception) {
                 println("!E: Connection with client ${client.key} was closed!")
+                e.printStackTrace()
                 names.remove(client.key)
                 finishConnection(client.key)
             }

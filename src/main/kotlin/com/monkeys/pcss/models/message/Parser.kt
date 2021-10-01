@@ -35,7 +35,7 @@ fun parseHeader(headerMessage: String): Header {
 }
 
 fun parseMessage(message: String) : Message? {
-    return if (!message.isNullOrEmpty()) {
+    return if (message.isNotEmpty() && message.isNotBlank()) {
         val splitMessage = message.split("_;_")
         val header = parseHeader(splitMessage[0])
         val data = parseData(splitMessage[1])
