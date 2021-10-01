@@ -88,7 +88,7 @@ class Client(host: String, port: Int) {
         println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
         try {
             while (stillWorking) {
-                print("->:")
+                print("m: ")
                 when (val userMessage = readLine()) {
                     "" -> continue
                     "q" -> {
@@ -156,7 +156,7 @@ class Client(host: String, port: Int) {
                     )
 
                     println(finalData.getClientMessage())
-                    print("->:")
+                    print("m: ")
 
                 val size = parsedServerMessage.header.fileSize
                 val byteArray = ByteArray(size)
