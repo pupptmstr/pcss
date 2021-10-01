@@ -163,7 +163,7 @@ class Client(host: String, port: Int) {
                         val size = parsedServerMessage.header.fileSize
                         val byteArray = ByteArray(size)
                         if (parsedServerMessage.header.isFileAttached) {
-                            receiver.read(byteArray)
+                            receiver.readNBytes(byteArray,0, byteArray.size)
                             val fileName = finalData.fileName
                             val senderName = finalData.senderName
                             val time = finalData.time
