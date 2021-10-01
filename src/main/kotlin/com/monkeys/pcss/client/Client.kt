@@ -9,8 +9,10 @@ import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
+import java.net.FileNameMap
 import java.net.Socket
 import java.net.SocketException
+import java.net.URLConnection
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -92,17 +94,28 @@ class Client (host: String, port: Int) {
                     val msg = parsedMessage.first
                     val file = parsedMessage.second
                     val fileName = file?.name
-                    val fileByteArray = file?.readBytes()
+                    var fileByteArray = ByteArray(0)
+
+                    if (file != null) {
+                        val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
+                        val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
+
+                        if (!setOf("image", "video", "audio").contains(fileType)) {
+                            println("You can only attach media files, any others may be unsafe. Your file was not attached")
+                        } else {
+                            fileByteArray = file.readBytes()
+                        }
+                    }
 
                     val data = Data(null, name, "", msg, fileName)
                     val header = Header(MessageType.MESSAGE, file != null,
-                        fileByteArray?.size ?: 0)
+                        fileByteArray.size)
                     val message = Message(header, data)
 
                     send(sender, message.getMessage())
 
                     if (header.isFileAttached) {
-                        send(sender, fileByteArray ?: ByteArray(0))
+                        send(sender, fileByteArray)
                     }
                 }
             }
@@ -132,12 +145,7 @@ class Client (host: String, port: Int) {
                 val byteArray = ByteArray(size)
                 if (parsedServerMessage.header.isFileAttached) {
                     receiver.read(byteArray)
-                }
-
-                val fileName = parsedServerMessage.data.fileName
-
-
-                if (fileName != null) {
+                    val fileName = parsedServerMessage.data.fileName
                     val file1 = File(fileName)
                     file1.createNewFile()
                     file1.writeBytes(byteArray)
