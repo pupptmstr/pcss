@@ -3,6 +3,7 @@ package com.monkeys.pcss.client
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readMessageFromInputStream
 import com.monkeys.pcss.send
+import com.monkeys.pcss.shapingFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -29,9 +30,9 @@ class Client(host: String, port: Int) {
 
     suspend fun start() = coroutineScope {
 
+        var nameExist = true
         var nameExist = false
         var isSingingInNow = true
-
         println("Enter your nickname or \'q\' to exit.")
 
         when (val userInput = readLine()) {
@@ -158,22 +159,25 @@ class Client(host: String, port: Int) {
                     println(finalData.getClientMessage())
                     print("->:")
 
-                    val size = parsedServerMessage.header.fileSize
-                    val byteArray = ByteArray(size)
-                    if (parsedServerMessage.header.isFileAttached) {
-                        receiver.read(byteArray)
-                        val fileName = parsedServerMessage.data.fileName
-                        val file1 = File(fileName)
-                        file1.createNewFile()
-                        file1.writeBytes(byteArray)
-                    }
+                val size = parsedServerMessage.header.fileSize
+                val byteArray = ByteArray(size)
+                if (parsedServerMessage.header.isFileAttached) {
+                    receiver.read(byteArray)
+                    val fileName = finalData.fileName
+                    val senderName = finalData.senderName
+                    val time = finalData.time
+                    val file1 = File(shapingFileName(fileName!!, senderName, time))
+                    file1.createNewFile()
+                    file1.writeBytes(byteArray)
                 }
             }
+        }
         } catch (e: Exception) {
             println("!E: There is an ERROR while receiving new messages. Probably the server was destroyed by evil goblins.")
             stopConnection()
         }
     }
+
 
     private fun stopConnection() {
         try {
