@@ -9,15 +9,17 @@ import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
+import java.net.FileNameMap
 import java.net.Socket
 import java.net.SocketException
+import java.net.URLConnection
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
 
-class Client (host: String, port: Int) {
+class Client(host: String, port: Int) {
 
     private var socket: Socket = Socket(host, port)
     private val receiver = BufferedInputStream(socket.getInputStream())
@@ -42,7 +44,7 @@ class Client (host: String, port: Int) {
             }
             else -> {
 
-                val data = Data(null, userInput, "","", null)
+                val data = Data(null, userInput, "", "", null)
                 val header = Header(MessageType.LOGIN, false, 0)
                 val message = Message(header, data)
 
@@ -59,7 +61,8 @@ class Client (host: String, port: Int) {
                         val type = parsedServerMessage.header.type
                         val senderName = parsedServerMessage.data.senderName
                         if (messageInfo == "Name is taken, please try to connect again"
-                            && type == MessageType.LOGIN && senderName == "server") {
+                            && type == MessageType.LOGIN && senderName == "server"
+                        ) {
                             stillWorking = false
                             nameExist = true
                         } else {
@@ -97,19 +100,30 @@ class Client (host: String, port: Int) {
                         val msg = parsedMessage.first
                         val file = parsedMessage.second
                         val fileName = file?.name
-                        val fileByteArray = file?.readBytes()
+                        var fileByteArray = ByteArray(0)
+
+                        if (file != null) {
+                            val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
+                            val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
+
+                            if (!setOf("image", "video", "audio").contains(fileType)) {
+                                println("You can only attach media files, any others may be unsafe. Your file was not attached")
+                            } else {
+                                fileByteArray = file.readBytes()
+                            }
+                        }
 
                         val data = Data(null, name, "", msg, fileName)
                         val header = Header(
                             MessageType.MESSAGE, file != null,
-                            fileByteArray?.size ?: 0
+                            fileByteArray.size
                         )
                         val message = Message(header, data)
 
                         send(sender, message.getMessage())
 
                         if (header.isFileAttached) {
-                            send(sender, fileByteArray ?: ByteArray(0))
+                            send(sender, fileByteArray)
                         }
                     }
                 }
@@ -122,39 +136,39 @@ class Client (host: String, port: Int) {
 
     private fun receivingMessages() {
         try {
-        while (stillWorking) {
-            if (receiver.available() > 0) {
+            while (stillWorking) {
+                if (receiver.available() > 0) {
 
-                val serverMessage = readMessageFromInputStream(receiver)
-                val parsedServerMessage = parseMessage(serverMessage)
+                    val serverMessage = readMessageFromInputStream(receiver)
+                    val parsedServerMessage = parseMessage(serverMessage)
 
-                val serverData = parsedServerMessage.data
+                    val serverData = parsedServerMessage.data
 
-                val serverZoneDateTime = serverData.time.replace("{","[").replace("}","]")
-                val id = TimeZone.getDefault().id
-                val parsedSZDT = ZonedDateTime.parse(serverZoneDateTime)
-                val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id)).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
+                    val serverZoneDateTime = serverData.time.replace("{", "[").replace("}", "]")
+                    val id = TimeZone.getDefault().id
+                    val parsedSZDT = ZonedDateTime.parse(serverZoneDateTime)
+                    val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id))
+                        .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
 
-                val finalData = Data(serverData.messageId, serverData.senderName,
-                    clientSZDT, serverData.messageText, serverData.fileName)
+                    val finalData = Data(
+                        serverData.messageId, serverData.senderName,
+                        clientSZDT, serverData.messageText, serverData.fileName
+                    )
 
-                println(finalData.getClientMessage())
+                    println(finalData.getClientMessage())
+                    print("->:")
 
-                val size = parsedServerMessage.header.fileSize
-                val byteArray = ByteArray(size)
-                if (parsedServerMessage.header.isFileAttached) {
-                    receiver.read(byteArray)
-                }
-
-                val fileName = parsedServerMessage.data.fileName
-
-                if (!fileName.isNullOrEmpty() && parsedServerMessage.header.isFileAttached) {
-                    val file1 = File(fileName)
-                    file1.createNewFile()
-                    file1.writeBytes(byteArray)
+                    val size = parsedServerMessage.header.fileSize
+                    val byteArray = ByteArray(size)
+                    if (parsedServerMessage.header.isFileAttached) {
+                        receiver.read(byteArray)
+                        val fileName = parsedServerMessage.data.fileName
+                        val file1 = File(fileName)
+                        file1.createNewFile()
+                        file1.writeBytes(byteArray)
+                    }
                 }
             }
-        }
         } catch (e: Exception) {
             println("!E: There is an ERROR while receiving new messages. Probably the server was destroyed by evil goblins.")
             stopConnection()
