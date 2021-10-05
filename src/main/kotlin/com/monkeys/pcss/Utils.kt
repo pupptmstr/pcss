@@ -2,8 +2,7 @@ package com.monkeys.pcss
 
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 
 const val STANDARD_PORT = 8081
 
@@ -47,11 +46,8 @@ fun generateMessageId(): String {
     return "testNew"
 }
 
-fun readMessageFromInputStream(inputStream: InputStream): String {
-    val byteArray = ByteArray(inputStream.available())
-    inputStream.read(byteArray)
-    return String(byteArray).replace("\u0000", "")
-}
+fun readMessageFromInputStream(inputStream: InputStream): String =
+    BufferedReader(InputStreamReader(inputStream)).readLine()
 
 fun send(outputStream: OutputStream, byteArray: ByteArray) {
     outputStream.write(byteArray)
