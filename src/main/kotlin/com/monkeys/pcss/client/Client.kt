@@ -152,13 +152,10 @@ class Client(host: String, port: Int) {
                         val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id))
                             .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
 
-                        val finalData = Data(
+                        var finalData = Data(
                             serverData.messageId, serverData.senderName,
                             clientSZDT, serverData.messageText, serverData.fileName
                         )
-
-                        println(finalData.getClientMessage())
-                        print("m: ")
 
                         val size = parsedServerMessage.header.fileSize
                         val byteArray = ByteArray(size)
@@ -167,10 +164,19 @@ class Client(host: String, port: Int) {
                             val fileName = finalData.fileName
                             val senderName = finalData.senderName
                             val time = finalData.time
-                            val file1 = File(shapingFileName(fileName!!, senderName, time))
+                            val finalFileName = shapingFileName(fileName!!, senderName, time)
+                            val file1 = File(finalFileName)
                             file1.createNewFile()
                             file1.writeBytes(byteArray)
+                            finalData = Data(
+                                serverData.messageId, serverData.senderName,
+                                clientSZDT, serverData.messageText, finalFileName
+                            )
                         }
+
+                        println(finalData.getClientMessage())
+                        print("m: ")
+
                     }
                 }
             }
