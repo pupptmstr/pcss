@@ -3,6 +3,8 @@ package com.monkeys.pcss
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
 import java.io.*
+import java.net.Socket
+import java.net.SocketException
 
 const val STANDARD_PORT = 8081
 const val DOWNLOADS_DIR = "PCSS downloads/"
@@ -51,8 +53,13 @@ fun readMessageFromInputStream(inputStream: InputStream): String =
     BufferedReader(InputStreamReader(inputStream)).readLine()
 
 fun send(outputStream: OutputStream, byteArray: ByteArray) {
-    outputStream.write(byteArray)
-    outputStream.flush()
+    try {
+        outputStream.write(byteArray)
+        outputStream.flush()
+    } catch (e: SocketException) {
+        println("ууупс")
+        //обработка отправления при выключении сервера, отключении клиента
+    }
 }
 
 fun shapingFileName(fileName: String, senderName: String, time: String): String {

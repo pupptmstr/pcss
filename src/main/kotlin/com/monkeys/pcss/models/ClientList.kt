@@ -41,6 +41,9 @@ class ClientList() {
         clients.remove(id)
         socketList[id]!!.close()
         socketList.remove(id)
+        val data = Data(null, id, "", "Client $id disconnected to chat", null)
+        val header = Header(MessageType.SPECIAL, false, 0)
+        writeToEveryBody(Message(header, data), ByteArray(0))
     }
 
     fun getInputStream(id: String): InputStream {
