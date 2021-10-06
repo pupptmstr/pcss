@@ -1,14 +1,12 @@
 package com.monkeys.pcss.models
 
+import com.monkeys.pcss.DOWNLOADS_DIR
 import com.monkeys.pcss.models.message.Data
 import com.monkeys.pcss.models.message.Header
 import com.monkeys.pcss.models.message.Message
 import com.monkeys.pcss.models.message.MessageType
 import com.monkeys.pcss.send
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.Socket
 import java.util.*
 
@@ -25,6 +23,9 @@ class ClientList() {
             socket.getOutputStream().write(Message(header, data).getMessage())
             false
         } else {
+            val downloadDir = File(DOWNLOADS_DIR)
+            if (!downloadDir.exists())
+                downloadDir.mkdir()
             clients[newId] = Pair(BufferedInputStream(socket.getInputStream()),
                 BufferedOutputStream(socket.getOutputStream()))
             socketList[newId] = socket

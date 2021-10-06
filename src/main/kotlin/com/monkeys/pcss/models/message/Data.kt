@@ -1,6 +1,8 @@
 package com.monkeys.pcss.models.message
 
 import com.monkeys.pcss.kit
+import com.monkeys.pcss.models.AsciiArt
+import java.io.File
 
 data class Data(
     var messageId: String? = null,
@@ -21,15 +23,12 @@ data class Data(
         fileName = data.fileName
     }
 
-    fun getClientMessage(): String =
+    fun getClientMessage(image: File?): String =
         "<$time> [$senderName] :: ${messageText.replace( "_%+<+$","[")
             .replace("_%+>+\$", "]")} :: " +
                 "(${if (fileName.isNullOrEmpty()) "no file" else fileName} attached)\n" +
-                if (!fileName.isNullOrEmpty()) {
-                    //TODO() если фото, то
-                    //берем файл, преобразуем его в аскии и вставляем
-                    //иначе пофиг
-                    "$fileName\n${kit()}"
+                if (image != null) {
+                    "\n${AsciiArt().getAsciiArt(image)}"
                 } else {
                     kit()
                 }

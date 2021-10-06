@@ -1,5 +1,6 @@
 package com.monkeys.pcss.client
 
+import com.monkeys.pcss.DOWNLOADS_DIR
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readMessageFromInputStream
 import com.monkeys.pcss.send
@@ -165,17 +166,19 @@ class Client(host: String, port: Int) {
                             val senderName = finalData.senderName
                             val time = finalData.time
                             val finalFileName = shapingFileName(fileName!!, senderName, time)
-                            val file1 = File(finalFileName)
+                            val file1 = File(DOWNLOADS_DIR + finalFileName)
                             file1.createNewFile()
                             file1.writeBytes(byteArray)
                             finalData = Data(
                                 serverData.messageId, serverData.senderName,
                                 clientSZDT, serverData.messageText, finalFileName
                             )
+                            println(finalData.getClientMessage(File(file1.absolutePath)))
+                            print("m: ")
+                        } else {
+                            println(finalData.getClientMessage(null))
+                            print("m: ")
                         }
-
-                        println(finalData.getClientMessage())
-                        print("m: ")
 
                     }
                 }
