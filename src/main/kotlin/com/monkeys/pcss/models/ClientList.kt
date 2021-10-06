@@ -30,7 +30,7 @@ class ClientList() {
                 BufferedOutputStream(socket.getOutputStream()))
             socketList[newId] = socket
             val data = Data(senderName = "server", messageText =
-            "Great, your name now is $newId, you can communicate")
+            "Great, your name now is $newId, you can communicate. Now there are ${clients.size - 1} people in the chat")
             val header = Header(MessageType.LOGIN, false, 0)
             socket.getOutputStream().write(Message(header, data).getMessage())
             true

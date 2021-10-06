@@ -28,6 +28,11 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
                 val parsedMessage = parseMessage(message)
                 name = parsedMessage!!.data.senderName
                 isSuccessfullyLogin = clientList.addNewClient(client, name)
+                if (isSuccessfullyLogin) {
+                    val data = Data(null, name, "", "Client $name connected to chat", null)
+                    val header = Header(MessageType.SPECIAL, false, 0)
+                    clientList.writeToEveryBody(Message(header, data), ByteArray(0))
+                }
                 break
             }
         }
