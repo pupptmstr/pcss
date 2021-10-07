@@ -178,8 +178,18 @@ class Client(host: String, port: Int) {
                                     serverData.messageId, serverData.senderName,
                                     clientSZDT, serverData.messageText, finalFileName
                                 )
-                                println(finalData.getClientMessage(File(file1.absolutePath)))
-                                print("m: ")
+
+                                val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
+                                val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
+
+                                if (fileType.equals("image")) {
+                                    println(finalData.getClientMessage(File(file1.absolutePath)))
+                                    print("m: ")
+                                } else {
+                                    println(finalData.getClientMessage(null))
+                                    print("m: ")
+                                }
+
                             } else {
                                 println(finalData.getClientMessage(null))
                                 print("m: ")

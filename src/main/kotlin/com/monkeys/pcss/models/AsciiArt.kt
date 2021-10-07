@@ -17,6 +17,7 @@ class AsciiArt {
                 val color = image.getRGB(x, y)
                 val colorCode = ((abs(color).toDouble() / (Int.MAX_VALUE / 100)) * 255).roundToInt().toShort()
                 sb.append("${colorCodeIntoChar(colorCode)}")
+                sb.append("${colorCodeIntoChar(colorCode)}")
             }
             if (sb.toString().trim().isNotEmpty()) {
                 res.append(sb.toString().replace("\t", " ").replace("\n", " ")).append("\n")
