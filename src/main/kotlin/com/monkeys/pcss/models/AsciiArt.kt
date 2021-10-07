@@ -17,7 +17,6 @@ class AsciiArt {
                 val color = image.getRGB(x, y)
                 val colorCode = ((abs(color).toDouble() / (Int.MAX_VALUE / 100)) * 255).roundToInt().toShort()
                 sb.append("${colorCodeIntoChar(colorCode)}")
-                sb.append("${colorCodeIntoChar(colorCode)}")
             }
             if (sb.toString().trim().isNotEmpty()) {
                 res.append(sb.toString().replace("\t", " ").replace("\n", " ")).append("\n")
@@ -43,8 +42,8 @@ class AsciiArt {
     }
 
     private fun getStep(width: Int, height: Int): Pair<Int, Int> {
-        val heightWanna = 25
-        val widthWanna = 45
+        val heightWanna = 32
+        val widthWanna = 128
         return ((height / heightWanna) to (width / widthWanna))
     }
 }
