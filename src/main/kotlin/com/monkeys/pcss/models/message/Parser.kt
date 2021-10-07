@@ -40,7 +40,9 @@ fun parseMessage(message: String) : Message? {
         val header = parseHeader(splitMessage[0])
         val data = parseData(splitMessage[1])
         Message(header, data)
-    } else null
+    } else {
+        null
+    }
 }
 
 fun parseHostAndPort(arg: String) : Pair<String, Int> {
@@ -56,14 +58,14 @@ fun parseUserMessage(msg: String) : Pair<String,File?> {
     var filePath = splitMsg[splitMsg.size - 1]
     filePath = filePath.filterNot { str -> "]]".contains(str) }
     val file = File(filePath)
-    if (file.isFile) {
-        return when (splitMsg.size) {
+    return if (file.isFile) {
+        when (splitMsg.size) {
             1 -> Pair(msg, null)
             2 -> Pair(splitMsg[0], file)
             else -> Pair(collectMessage(splitMsg), file)
         }
     } else {
-        return Pair(msg, null)
+        Pair(msg, null)
     }
 
 }

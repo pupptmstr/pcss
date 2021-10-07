@@ -4,11 +4,13 @@ import com.monkeys.pcss.generateMessageId
 import com.monkeys.pcss.models.ClientList
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readMessageFromInputStream
+import java.io.BufferedInputStream
 import java.net.Socket
 import java.time.ZonedDateTime
 
 
 suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
+    println("Coroutine started")
     val loginRes = login(client, clientList)
     if (loginRes.first) {
         startCommunication(loginRes.second, clientList)
@@ -18,13 +20,14 @@ suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
 }
 
 fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
+    println("Login started")
     try {
-        val receiver = client.getInputStream()
+        val receiver = BufferedInputStream(client.getInputStream())
         var name = ""
         var isSuccessfullyLogin = false
         while (true) {
             if (receiver.available() > 0) {
-                val message = readMessageFromInputStream(receiver)
+                val message = String(readMessageFromInputStream(receiver))
                 val parsedMessage = parseMessage(message)
                 name = parsedMessage!!.data.senderName
                 isSuccessfullyLogin = clientList.addNewClient(client, name)
@@ -39,6 +42,7 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
         return Pair(isSuccessfullyLogin, name)
     } catch (e: Exception) {
         println("!E: Client connection was closed! He will come later probably?")
+        e.printStackTrace()
         return Pair(false, "server")
     }
 }
@@ -51,14 +55,15 @@ fun startCommunication(clientId: String, clientList: ClientList) {
         while (isWorking) {
             if (receiver.available() > 0) {
 
-                val message = readMessageFromInputStream(receiver)
+                val messageBytes = readMessageFromInputStream(receiver)
+                val message = String(messageBytes)
                 val parsedMessage = parseMessage(message)
 
                 if (parsedMessage != null) {
                     val size = parsedMessage.header.fileSize
                     val byteArray = ByteArray(size)
                     if (parsedMessage.header.isFileAttached) {
-                        receiver.readNBytes(byteArray, 0, byteArray.size)
+                        System.arraycopy(messageBytes, messageBytes.size - size, byteArray, 0, size)
                         println(byteArray.size)
                     }
 
@@ -95,6 +100,7 @@ fun startCommunication(clientId: String, clientList: ClientList) {
         }
     } catch (e: Exception) {
         println("!E: Connection with client was closed! Deleting him from clients list...")
+        e.printStackTrace()
         clientList.finishConnection(clientId)
     }
 }

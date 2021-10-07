@@ -2,7 +2,6 @@ package com.monkeys.pcss.server
 
 import com.monkeys.pcss.STANDARD_PORT
 import com.monkeys.pcss.models.ClientList
-import com.monkeys.pcss.models.message.Data
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -19,8 +18,9 @@ class Server {
                 println("Server is running")
                 while (true) {
                     val client = server.accept()
+                    println("New connection try!")
                     if (client.isConnected) {
-                        launch(Dispatchers.Default) {
+                        launch(Dispatchers.IO) {
                             clientCoroutine(client, clientList)
                         }
                     }

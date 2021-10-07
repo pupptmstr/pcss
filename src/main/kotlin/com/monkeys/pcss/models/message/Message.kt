@@ -11,7 +11,7 @@ data class Message(
     }
 
     fun getMessage() =
-        "${header.getHeader()}${data.getServerMessage()}\n".toByteArray()
+        "${header.getHeader()}${data.getServerMessage()}".toByteArray()
 
 
     override fun equals(other: Any?): Boolean {

@@ -5,8 +5,11 @@ import com.monkeys.pcss.models.message.Data
 import com.monkeys.pcss.models.message.Header
 import com.monkeys.pcss.models.message.Message
 import com.monkeys.pcss.models.message.MessageType
-import com.monkeys.pcss.send
-import java.io.*
+import com.monkeys.pcss.sendMessage
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.OutputStream
 import java.net.Socket
 import java.util.*
 
@@ -20,7 +23,7 @@ class ClientList() {
             val data = Data(senderName = "server", messageText =
             "Name is taken, please try to connect again")
             val header = Header(MessageType.LOGIN, false, 0)
-            socket.getOutputStream().write(Message(header, data).getMessage())
+            sendMessage(socket.getOutputStream(), Message(header, data).getMessage(), null)
             false
         } else {
             val downloadDir = File(DOWNLOADS_DIR)
@@ -30,9 +33,9 @@ class ClientList() {
                 BufferedOutputStream(socket.getOutputStream()))
             socketList[newId] = socket
             val data = Data(senderName = "server", messageText =
-            "Great, your name now is $newId, you can communicate. Now there are ${clients.size - 1} people in the chat")
+            "Great, your name now is $newId, you can communicate. There are ${clients.size - 1} people in the chat excepts you.")
             val header = Header(MessageType.LOGIN, false, 0)
-            socket.getOutputStream().write(Message(header, data).getMessage())
+            sendMessage(socket.getOutputStream(), Message(header, data).getMessage(), null)
             true
         }
     }
@@ -41,12 +44,12 @@ class ClientList() {
         clients.remove(id)
         socketList[id]!!.close()
         socketList.remove(id)
-        val data = Data(null, id, "", "Client $id disconnected to chat", null)
+        val data = Data(null, id, "", "Client $id disconnected from chat", null)
         val header = Header(MessageType.SPECIAL, false, 0)
         writeToEveryBody(Message(header, data), ByteArray(0))
     }
 
-    fun getInputStream(id: String): InputStream {
+    fun getInputStream(id: String): BufferedInputStream {
         return clients[id]!!.first
     }
 
@@ -65,10 +68,7 @@ class ClientList() {
             try {
                 if (client.key != name) {
                     val sender = client.value.second
-                    send(sender,message.getMessage())
-                    if (fileByteArray.isNotEmpty()) {
-                        send(sender,fileByteArray)
-                    }
+                    sendMessage(sender, message.getMessage(), fileByteArray)
                     names.add(client.key)
                 }
             } catch (e: Exception) {

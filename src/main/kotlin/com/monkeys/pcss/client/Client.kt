@@ -3,7 +3,7 @@ package com.monkeys.pcss.client
 import com.monkeys.pcss.DOWNLOADS_DIR
 import com.monkeys.pcss.models.message.*
 import com.monkeys.pcss.readMessageFromInputStream
-import com.monkeys.pcss.send
+import com.monkeys.pcss.sendMessage
 import com.monkeys.pcss.shapingFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import java.io.IOException
 import java.net.FileNameMap
 import java.net.Socket
 import java.net.SocketException
@@ -41,7 +40,7 @@ class Client(host: String, port: Int) {
                 stillWorking = false
             }
             "q" -> {
-                send(sender, "EXIT".toByteArray())
+                sendMessage(sender, "EXIT".toByteArray(), null)
                 stillWorking = false
             }
             else -> {
@@ -50,14 +49,14 @@ class Client(host: String, port: Int) {
                 val header = Header(MessageType.LOGIN, false, 0)
                 val message = Message(header, data)
 
-                send(sender, message.getMessage())
+                sendMessage(sender, message.getMessage(), null)
 
                 var messageInfo = ""
 
                 while (isSingingInNow) {
                     if (receiver.available() > 0) {
 
-                        val serverMessage = readMessageFromInputStream(receiver)
+                        val serverMessage = String(readMessageFromInputStream(receiver))
                         val parsedServerMessage = parseMessage(serverMessage)
                         messageInfo = parsedServerMessage!!.data.messageText
                         val type = parsedServerMessage.header.type
@@ -94,7 +93,7 @@ class Client(host: String, port: Int) {
                 when (val userMessage = readLine()) {
                     "" -> continue
                     "q" -> {
-                        send(sender, "EXIT".toByteArray())
+                        sendMessage(sender, "EXIT".toByteArray(), null)
                         stillWorking = false
                     }
                     else -> {
@@ -113,21 +112,25 @@ class Client(host: String, port: Int) {
                                 file = null
                                 println("You can only attach media files, any others may be unsafe. Your file was not attached")
                             } else {
-                                fileByteArray = file.readBytes()
+                                if (file.canRead()) {
+                                    fileByteArray = file.readBytes()
+                                } else {
+                                    println("Can't read file, sending message without it")
+                                }
                             }
                         }
 
                         val data = Data(null, name, "", msg, fileName)
                         val header = Header(
-                            MessageType.MESSAGE, file != null,
+                            MessageType.MESSAGE, fileByteArray.isNotEmpty(),
                             fileByteArray.size
                         )
                         val message = Message(header, data)
 
-                        send(sender, message.getMessage())
-
                         if (header.isFileAttached) {
-                            send(sender, fileByteArray)
+                            sendMessage(sender, message.getMessage(), fileByteArray)
+                        } else {
+                            sendMessage(sender, message.getMessage(), null)
                         }
                     }
                 }
@@ -144,7 +147,8 @@ class Client(host: String, port: Int) {
             while (stillWorking) {
                 if (receiver.available() > 0) {
                     val serverMessage = readMessageFromInputStream(receiver)
-                    val parsedServerMessage = parseMessage(serverMessage)
+                    val stringServerMessage = String(serverMessage)
+                    val parsedServerMessage = parseMessage(stringServerMessage)
                     if (parsedServerMessage != null) {
 
                         val messageType = parsedServerMessage.header.type
@@ -165,8 +169,8 @@ class Client(host: String, port: Int) {
 
                             val size = parsedServerMessage.header.fileSize
                             val byteArray = ByteArray(size)
+                            System.arraycopy(serverMessage, serverMessage.size - size, byteArray, 0, size)
                             if (parsedServerMessage.header.isFileAttached) {
-                                receiver.readNBytes(byteArray, 0, byteArray.size)
                                 val fileName = finalData.fileName
                                 val senderName = finalData.senderName
                                 val time = finalData.time
@@ -182,7 +186,7 @@ class Client(host: String, port: Int) {
                                 val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
                                 val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
 
-                                if (fileType.equals("image")) {
+                                if (fileType == "image") {
                                     println(finalData.getClientMessage(File(file1.absolutePath)))
                                     print("m: ")
                                 } else {

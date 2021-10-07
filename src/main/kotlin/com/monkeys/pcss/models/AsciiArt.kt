@@ -42,8 +42,8 @@ class AsciiArt {
     }
 
     private fun getStep(width: Int, height: Int): Pair<Int, Int> {
-        val heightWanna = 32
-        val widthWanna = 128
+        val heightWanna = 16
+        val widthWanna = 64
         return ((height / heightWanna) to (width / widthWanna))
     }
 }
