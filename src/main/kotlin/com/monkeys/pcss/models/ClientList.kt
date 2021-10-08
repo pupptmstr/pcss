@@ -5,7 +5,6 @@ import com.monkeys.pcss.models.message.Data
 import com.monkeys.pcss.models.message.Header
 import com.monkeys.pcss.models.message.Message
 import com.monkeys.pcss.models.message.MessageType
-import com.monkeys.pcss.sendMessage
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -52,7 +51,8 @@ class ClientList() {
         socketList[id]!!.close()
         socketList.remove(id)
         val data = Data(0, id, "", "Client $id disconnected from chat", null)
-        val header = Header(MessageType.SPECIAL, false, 0)
+        val dataSize = data.getServerMessage().length
+        val header = Header(MessageType.SPECIAL, false, dataSize)
         writeToEveryBody(Message(header, data), ByteArray(0))
     }
 

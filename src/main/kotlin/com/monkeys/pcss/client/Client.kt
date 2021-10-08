@@ -33,6 +33,9 @@ class Client(host: String, port: Int) {
         println("Enter your nickname or \'q\' to exit.")
 
         when (val userInput = readLine()) {
+            "" -> {
+                stillWorking = false
+            }
             null -> {
                 stillWorking = false
             }
@@ -60,9 +63,10 @@ class Client(host: String, port: Int) {
                         messageInfo = serverMessage!!.data.messageText
                         val type = serverMessage.header.type
                         val senderName = serverMessage.data.senderName
+
                         if (messageInfo == "Name is taken, please try to connect again"
-                            && type == MessageType.LOGIN && senderName == "server"
-                        ) {
+                            && type == MessageType.LOGIN && senderName == "server")
+                        {
                             stillWorking = false
                             nameExist = true
                         } else {
@@ -73,7 +77,8 @@ class Client(host: String, port: Int) {
                     }
                 }
                 println(messageInfo)
-
+                if (messageInfo != "Name is taken, please try to connect again")
+                    println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
             }
         }
         if (nameExist) {
@@ -85,7 +90,6 @@ class Client(host: String, port: Int) {
     }
 
     private fun sendingMessages() {
-        println("You can attach a picture by writing such a construction at the end of the message [[filepath]]")
         try {
             while (stillWorking) {
                 print("m: ")
@@ -149,56 +153,51 @@ class Client(host: String, port: Int) {
                     val serverMessage = fullMessage.first
                     val fileByteArray = fullMessage.second
 
-                    if (serverMessage != null) {
+                    val messageType = serverMessage.header.type
+                    val serverData = serverMessage.data
 
-                        val messageType = serverMessage.header.type
-                        val serverData = serverMessage.data
+                    if (messageType == MessageType.MESSAGE) {
 
-                        if (messageType == MessageType.MESSAGE) {
+                        val serverZoneDateTime = serverData.time.replace("{", "[").replace("}", "]")
+                        val id = TimeZone.getDefault().id
+                        val parsedSZDT = ZonedDateTime.parse(serverZoneDateTime)
+                        val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id))
+                            .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
 
-                            val serverZoneDateTime = serverData.time.replace("{", "[").replace("}", "]")
-                            val id = TimeZone.getDefault().id
-                            val parsedSZDT = ZonedDateTime.parse(serverZoneDateTime)
-                            val clientSZDT = parsedSZDT.withZoneSameInstant(ZoneId.of(id))
-                                .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
+                        var finalData = Data(
+                            serverData.fileSize, serverData.senderName,
+                            clientSZDT, serverData.messageText, serverData.fileName
+                        )
 
-                            var finalData = Data(
+                        if (serverMessage.header.isFileAttached) {
+                            val fileName = finalData.fileName
+                            val senderName = finalData.senderName
+                            val time = finalData.time
+                            val finalFileName = shapingFileName(fileName!!, senderName, time)
+                            val file1 = File(DOWNLOADS_DIR + finalFileName)
+                            file1.createNewFile()
+                            file1.writeBytes(fileByteArray)
+                            finalData = Data(
                                 serverData.fileSize, serverData.senderName,
-                                clientSZDT, serverData.messageText, serverData.fileName
-                            )
+                                clientSZDT, serverData.messageText, finalFileName)
 
-                            if (serverMessage.header.isFileAttached) {
-                                val fileName = finalData.fileName
-                                val senderName = finalData.senderName
-                                val time = finalData.time
-                                val finalFileName = shapingFileName(fileName!!, senderName, time)
-                                val file1 = File(DOWNLOADS_DIR + finalFileName)
-                                file1.createNewFile()
-                                file1.writeBytes(fileByteArray)
-                                finalData = Data(
-                                    serverData.fileSize, serverData.senderName,
-                                    clientSZDT, serverData.messageText, finalFileName
-                                )
-
-                                val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
-                                val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
-
-                                if (fileType == "image") {
-                                    println(finalData.getClientMessage(File(file1.absolutePath)))
-                                    print("m: ")
-                                } else {
-                                    println(finalData.getClientMessage(null))
-                                    print("m: ")
-                                }
-
+                            val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
+                            val fileType = fileNameMap.getContentTypeFor(fileName).split("/")[0]
+                            if (fileType == "image") {
+                                println(finalData.getClientMessage(File(file1.absolutePath)))
+                                print("m: ")
                             } else {
                                 println(finalData.getClientMessage(null))
                                 print("m: ")
                             }
+
                         } else {
-                            println(serverData.messageText)
+                            println(finalData.getClientMessage(null))
                             print("m: ")
                         }
+                    } else {
+                        println(serverData.messageText)
+                        print("m: ")
                     }
                 }
             }

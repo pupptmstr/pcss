@@ -10,6 +10,7 @@ import java.io.OutputStream
 import java.net.SocketException
 
 const val STANDARD_PORT = 8081
+const val STANDARD_HEADER_SIZE = 20
 const val DOWNLOADS_DIR = "PCSS downloads/"
 
 fun restoreArguments(args: List<String>): WorkType = when {
@@ -52,30 +53,8 @@ fun generateMessageId(): String {
     return "testNew"
 }
 
-fun readMessageFromInputStream(inputStream: BufferedInputStream): ByteArray {
-    val out = arrayListOf<Byte>()
-    var count: Int
-    val buffer = ByteArray(4096) // or 4096, or more
-
-    while (inputStream.read(buffer).also { count = it } > 0) {
-        out.addAll(buffer.slice(0 until count))
-        val available = inputStream.available()
-        if (count < 4096 && available == 0) {
-            Thread.sleep(500)
-            if (inputStream.available() == 0) break
-        }
-    }
-    val res = out.toByteArray()
-    return res
-}
-
 fun send(outputStream: OutputStream, byteArray: ByteArray) {
-    try {
-        outputStream.write(byteArray)
-    } catch (e: SocketException) {
-        println("ууупс")
-        //обработка отправления при выключении сервера, отключении клиента
-    }
+    outputStream.write(byteArray)
 }
 
 fun sendMessage(outputStream: OutputStream, message: ByteArray, file: ByteArray?) {
@@ -87,9 +66,8 @@ fun sendMessage(outputStream: OutputStream, message: ByteArray, file: ByteArray?
 }
 
 fun getNewMessage(inputStream: BufferedInputStream): Pair<Message, ByteArray> {
-    val fixedHeaderSize = 20
-    val headerByteArray = ByteArray(fixedHeaderSize)
-    inputStream.readNBytes(headerByteArray,0 ,fixedHeaderSize)
+    val headerByteArray = ByteArray(STANDARD_HEADER_SIZE)
+    inputStream.readNBytes(headerByteArray,0 , STANDARD_HEADER_SIZE)
     val sHeader = String(headerByteArray).replace("\u0000", "")
     val header = Header(sHeader)
     val dataByteArray = ByteArray(header.dataSize)
