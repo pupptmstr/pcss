@@ -79,7 +79,6 @@ fun sendMessage(outputStream: OutputStream, message: ByteArray, file: ByteArray?
     send(outputStream, message)
     if (file != null && file.isNotEmpty()) {
         send(outputStream, file)
-        println(file.size)
     }
     outputStream.flush()
 }

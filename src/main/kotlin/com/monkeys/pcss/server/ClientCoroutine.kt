@@ -10,7 +10,6 @@ import java.time.ZonedDateTime
 
 
 suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
-    println("Coroutine started")
     val loginRes = login(client, clientList)
     if (loginRes.first) {
         startCommunication(loginRes.second, clientList)
@@ -20,7 +19,6 @@ suspend fun clientCoroutine(client: Socket, clientList: ClientList) {
 }
 
 fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
-    println("Login started")
     try {
         val receiver = BufferedInputStream(client.getInputStream())
         var name = ""
@@ -42,7 +40,6 @@ fun login(client: Socket, clientList: ClientList): Pair<Boolean, String> {
         return Pair(isSuccessfullyLogin, name)
     } catch (e: Exception) {
         println("!E: Client connection was closed! He will come later probably?")
-        e.printStackTrace()
         return Pair(false, "server")
     }
 }
@@ -100,8 +97,6 @@ fun startCommunication(clientId: String, clientList: ClientList) {
         }
     } catch (e: Exception) {
         println("!E: Connection with client was closed! Deleting him from clients list...")
-        e.printStackTrace()
         clientList.finishConnection(clientId)
     }
 }
-

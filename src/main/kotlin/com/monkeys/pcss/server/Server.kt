@@ -18,7 +18,6 @@ class Server {
                 println("Server is running")
                 while (true) {
                     val client = server.accept()
-                    println("New connection try!")
                     if (client.isConnected) {
                         launch(Dispatchers.IO) {
                             clientCoroutine(client, clientList)
