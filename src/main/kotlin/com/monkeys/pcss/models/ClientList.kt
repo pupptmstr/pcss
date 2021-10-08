@@ -19,11 +19,15 @@ class ClientList() {
     private val socketList = Collections.synchronizedMap(mutableMapOf<String, Socket>())
 
     fun addNewClient(socket: Socket, newId: String): Boolean {
+        val buffOS = BufferedOutputStream(socket.getOutputStream())
         return if (clients.keys.contains(newId) || newId == "server") {
             val data = Data(senderName = "server", messageText =
             "Name is taken, please try to connect again")
-            val header = Header(MessageType.LOGIN, false, 0)
-            sendMessage(socket.getOutputStream(), Message(header, data).getMessage(), null)
+            val dataSize = data.getServerMessage().length
+            val header = Header(MessageType.LOGIN, false, dataSize)
+            val message = Message(header, data).getMessage()
+            buffOS.write(message)
+            buffOS.flush()
             false
         } else {
             val downloadDir = File(DOWNLOADS_DIR)
@@ -34,8 +38,11 @@ class ClientList() {
             socketList[newId] = socket
             val data = Data(senderName = "server", messageText =
             "Great, your name now is $newId, you can communicate. There are ${clients.size - 1} people in the chat excepts you.")
-            val header = Header(MessageType.LOGIN, false, 0)
-            sendMessage(socket.getOutputStream(), Message(header, data).getMessage(), null)
+            val dataSize = data.getServerMessage().length
+            val header = Header(MessageType.LOGIN, false, dataSize)
+            val message = Message(header, data).getMessage()
+            buffOS.write(message)
+            buffOS.flush()
             true
         }
     }
@@ -44,7 +51,7 @@ class ClientList() {
         clients.remove(id)
         socketList[id]!!.close()
         socketList.remove(id)
-        val data = Data(null, id, "", "Client $id disconnected from chat", null)
+        val data = Data(0, id, "", "Client $id disconnected from chat", null)
         val header = Header(MessageType.SPECIAL, false, 0)
         writeToEveryBody(Message(header, data), ByteArray(0))
     }
@@ -68,7 +75,8 @@ class ClientList() {
             try {
                 if (client.key != name) {
                     val sender = client.value.second
-                    sendMessage(sender, message.getMessage(), fileByteArray)
+                    sender.write(message.getMessage().plus(fileByteArray))
+                    sender.flush()
                     names.add(client.key)
                 }
             } catch (e: Exception) {

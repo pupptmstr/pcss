@@ -5,7 +5,7 @@ import com.monkeys.pcss.models.AsciiArt
 import java.io.File
 
 data class Data(
-    var messageId: String? = null,
+    var fileSize: Int = 0,
     var senderName: String = "",
     var time: String = "",
     var messageText: String = "",
@@ -15,7 +15,7 @@ data class Data(
 
     constructor(dataMessage: String) : this() {
         val data = parseData(dataMessage)
-        messageId = data.messageId
+        fileSize = data.fileSize
         senderName = data.senderName
         time = data.time
         messageText = data.messageText.replace("[", "_%+<+$")
@@ -34,5 +34,5 @@ data class Data(
                 }
 
     fun getServerMessage(): String =
-        "_[${messageId ?: ""}],[$senderName],[$time],[$messageText],[${fileName?: ""}]_;_"
+        "_[${fileSize ?: ""}],[$senderName],[$time],[$messageText],[${fileName?: ""}]_;_"
 }

@@ -5,7 +5,7 @@ import java.io.File
 fun parseData(dataMessage: String): Data {
     val timeRegex = """[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]+((\+[0-9]{2}:[0-9]{2})|Z)\{[A-Za-z/]+\}"""
     val regex =
-        """\[([A-Za-z0-9]+)?\],\[([A-Za-z0-9А-Яа-я]+)\],\[($timeRegex)?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z0-9A-Z]+))?\]""".toRegex()
+        """_\[([A-Za-z0-9]+)?\],\[([A-Za-z0-9А-Яа-я]+)\],\[($timeRegex)?\],\[([^\[\]]*)\],\[(([^(\[\])]+)\.([a-z0-9A-Z]+))?\]_;_""".toRegex()
     val matchResult = regex.matchEntire(dataMessage)
     return if (matchResult != null) {
         val messageId = matchResult.groupValues[1]
@@ -13,7 +13,7 @@ fun parseData(dataMessage: String): Data {
         val time = matchResult.groupValues[3]
         val messageText = matchResult.groupValues[6]
         val fileName = matchResult.groupValues[7]
-        Data(messageId, senderName, time, messageText, fileName)
+        Data(messageId.toInt(), senderName, time, messageText, fileName)
     } else {
         Data()
     }
@@ -21,7 +21,7 @@ fun parseData(dataMessage: String): Data {
 
 fun parseHeader(headerMessage: String): Header {
     val regex =
-        """\[([0-2])\],\[([01])\],\[([0-9]+)\]""".toRegex()
+        """\[([0-2])\],\[([01])\],\[([0-9]+)\]_;""".toRegex()
 
     val matchResult = regex.matchEntire(headerMessage)
     return if (matchResult != null) {

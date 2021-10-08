@@ -2,6 +2,9 @@ package com.monkeys.pcss
 
 import com.monkeys.pcss.models.WorkType
 import com.monkeys.pcss.models.WorkType.*
+import com.monkeys.pcss.models.message.Data
+import com.monkeys.pcss.models.message.Header
+import com.monkeys.pcss.models.message.Message
 import java.io.BufferedInputStream
 import java.io.OutputStream
 import java.net.SocketException
@@ -83,6 +86,25 @@ fun sendMessage(outputStream: OutputStream, message: ByteArray, file: ByteArray?
     outputStream.flush()
 }
 
+fun getNewMessage(inputStream: BufferedInputStream): Pair<Message, ByteArray> {
+    val fixedHeaderSize = 20
+    val headerByteArray = ByteArray(fixedHeaderSize)
+    inputStream.readNBytes(headerByteArray,0 ,fixedHeaderSize)
+    val sHeader = String(headerByteArray).replace("\u0000", "")
+    val header = Header(sHeader)
+    val dataByteArray = ByteArray(header.dataSize)
+    inputStream.readNBytes(dataByteArray,0 ,header.dataSize)
+    val sData = String(dataByteArray).replace("\u0000", "")
+    val data = Data(sData)
+    val message = Message(header, data)
+    if (header.isFileAttached) {
+        val fileByteArray = ByteArray(data.fileSize)
+        inputStream.readNBytes(fileByteArray, 0, data.fileSize)
+        return Pair(message, fileByteArray)
+    }
+    return Pair(message, ByteArray(0))
+}
+
 fun shapingFileName(fileName: String, senderName: String, time: String): String {
     val builder = StringBuilder()
     val split = fileName.split(".")
@@ -94,6 +116,10 @@ fun shapingFileName(fileName: String, senderName: String, time: String): String 
     builder.append(".")
     builder.append(split[1])
     return builder.toString()
+}
+
+fun getFixedLengthString(dataSize: Int): String {
+    return String.format("%1$" + 8 + "s", dataSize).replace(' ', '0')
 }
 
 
