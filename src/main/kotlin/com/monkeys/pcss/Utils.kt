@@ -63,11 +63,11 @@ fun sendMessage(outputStream: OutputStream, message: ByteArray, file: ByteArray?
 fun getNewMessage(inputStream: BufferedInputStream): Pair<Message, ByteArray> {
     val headerByteArray = ByteArray(STANDARD_HEADER_SIZE)
     inputStream.readNBytes(headerByteArray,0 , STANDARD_HEADER_SIZE)
-    val sHeader = String(headerByteArray).replace("\u0000", "")
+    val sHeader = String(headerByteArray)
     val header = Header(sHeader)
     val dataByteArray = ByteArray(header.dataSize)
     inputStream.readNBytes(dataByteArray,0 ,header.dataSize)
-    val sData = String(dataByteArray).replace("\u0000", "")
+    val sData = String(dataByteArray)
     val data = Data(sData)
     val message = Message(header, data)
     if (header.isFileAttached) {
