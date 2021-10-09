@@ -65,7 +65,8 @@ fun parseUserMessage(msg: String) : Pair<String,File?> {
             else -> Pair(collectMessage(splitMsg), file)
         }
     } else {
-        Pair(msg, null)
+        Pair(msg.replace("[", "_%+<+$")
+            .replace("]", "_%+>+\$"), null)
     }
 
 }
