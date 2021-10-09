@@ -48,11 +48,6 @@ fun kit(): String =
             "    |U_____U|" +
             "\n"
 
-fun generateMessageId(): String {
-    //TODO()
-    return "testNew"
-}
-
 fun send(outputStream: OutputStream, byteArray: ByteArray) {
     outputStream.write(byteArray)
 }
@@ -83,7 +78,7 @@ fun getNewMessage(inputStream: BufferedInputStream): Pair<Message, ByteArray> {
     return Pair(message, ByteArray(0))
 }
 
-fun shapingFileName(fileName: String, senderName: String, time: String): String {
+fun shapeFileName(fileName: String, senderName: String, time: String): String {
     val builder = StringBuilder()
     val split = fileName.split(".")
     builder.append(split[0])
@@ -97,7 +92,7 @@ fun shapingFileName(fileName: String, senderName: String, time: String): String 
 }
 
 fun getFixedLengthString(dataSize: Int): String {
-    return String.format("%1$" + 8 + "s", dataSize).replace(' ', '0')
+    return dataSize.toString().padStart(8, '0')
 }
 
 

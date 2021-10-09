@@ -173,7 +173,7 @@ class Client(host: String, port: Int) {
                             val fileName = finalData.fileName
                             val senderName = finalData.senderName
                             val time = finalData.time
-                            val finalFileName = shapingFileName(fileName!!, senderName, time)
+                            val finalFileName = shapeFileName(fileName!!, senderName, time)
                             val file1 = File(DOWNLOADS_DIR + finalFileName)
                             file1.createNewFile()
                             file1.writeBytes(fileByteArray)
