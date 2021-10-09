@@ -13,7 +13,7 @@ const val STANDARD_PORT = 8081
 const val STANDARD_HEADER_SIZE = 20
 const val DOWNLOADS_DIR = "PCSS downloads/"
 
-fun restoreArguments(args: List<String>): WorkType = when {
+fun parseArguments(args: List<String>): WorkType = when {
     args.isEmpty() -> {
         SERVER
     }

@@ -84,12 +84,12 @@ class Client(host: String, port: Int) {
         if (nameExist) {
             stopConnection()
         } else {
-            launch(Dispatchers.IO) { sendingMessages() }
-            launch(Dispatchers.IO) { receivingMessages() }
+            launch(Dispatchers.IO) { sendMessages() }
+            launch(Dispatchers.IO) { receiveMessages() }
         }
     }
 
-    private fun sendingMessages() {
+    private fun sendMessages() {
         try {
             while (stillWorking) {
                 print("m: ")
@@ -144,7 +144,7 @@ class Client(host: String, port: Int) {
         }
     }
 
-    private fun receivingMessages() {
+    private fun receiveMessages() {
         try {
             while (stillWorking) {
                 if (receiver.available() > 0) {
